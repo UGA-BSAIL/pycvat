@@ -9,11 +9,15 @@ from functools import cached_property
 from pathlib import Path
 from zipfile import ZipFile
 
-import requests
+import numpy as np
 from datumaro.components.project import Project, ProjectDataset
+from datumaro.util.image import load_image
 from loguru import logger
+from methodtools import lru_cache
 
-from cvat.utils.cli.core.core import CLI, CVAT_API_V1
+from cvat.utils.cli.core.core import CLI
+
+from .api import Authenticator
 
 
 class Task:
@@ -25,9 +29,13 @@ class Task:
     """
     Format string to use for CVAT data dumps.
     """
+    _MAX_IMAGES_TO_CACHE = 256
+    """
+    Maximum number of downloaded images to cache in memory.
+    """
 
     @classmethod
-    def __load_zip(cls, *, zip_file: Path, extract_to: Path) -> "Task":
+    def __load_zip(cls, *, zip_file: Path, extract_to: Path) -> Path:
         """
         Loads task data from a downloaded Datumaro zip file.
 
@@ -36,7 +44,7 @@ class Task:
             extract_to: The directory to extract the zip file to.
 
         Returns:
-            The `Task` that it created.
+            The path to the unzipped project directory.
 
         """
         # Datumaro zips pollute the current directory, so we create a
@@ -49,26 +57,18 @@ class Task:
         with ZipFile(zip_file) as opened_zip:
             opened_zip.extractall(path=extracted_dir)
 
-        return Task(project_dir=extracted_dir)
+        return extracted_dir
 
     @classmethod
     @contextmanager
-    def download(
-        cls,
-        *,
-        task_id: int,
-        user: str,
-        password: str,
-        server: str = "localhost:8080",
-    ) -> "Task":
+    def download(cls, *, task_id: int, auth: Authenticator) -> "Task":
         """
-        Automatically downloads a task from a CVAT server. It is meant to be used as a context manager.
+        Automatically downloads a task from a CVAT server. It is meant to be
+        used as a context manager.
 
         Args:
             task_id: The ID of the task to download.
-            user: The user to log into CVAT as.
-            password: The user's password.
-            server: The address of the server to download the task from.
+            auth: Object that we use for authenticating with the API.
 
         Returns:
             The `Task` that it downloaded.
@@ -76,34 +76,75 @@ class Task:
         """
         logger.info("Downloading data for task {}.", task_id)
 
-        with ExitStack() as exit_stack:
-            session = exit_stack.enter_context(requests.Session())
-            # Data will be downloaded to a temporary directory.
-            output_dir = Path(
-                exit_stack.enter_context(tempfile.TemporaryDirectory())
-            )
+        with tempfile.TemporaryDirectory() as output_dir:
+            output_dir = Path(output_dir)
             logger.debug(
                 "Using {} as temporary project directory.", output_dir
             )
 
             # Download the annotation data from the server.
-            api = CVAT_API_V1(server)
-            cli = CLI(session, api, (user, password))
+            cli = CLI(auth.session, auth.api, auth.credentials,)
             output_zip_file = output_dir / f"dataset_{task_id}.zip"
             cli.tasks_dump(task_id, cls._DATUMARO_FORMAT, output_zip_file)
 
-            yield cls.__load_zip(
+            project_dir = cls.__load_zip(
                 zip_file=output_zip_file, extract_to=output_dir
             )
 
-    def __init__(self, *, project_dir: Path):
+            yield cls(project_dir=project_dir, cvat_cli=cli, task_id=task_id)
+
+    def __init__(self, *, project_dir: Path, cvat_cli: CLI, task_id: int):
         """
+        *Note: In general, this class is not meant to be instantiated directly.
+        Use the factory methods instead.*
+
         Args:
             project_dir: The path to the task directory on the disk.
+            cvat_cli: The CLI object to use for communicating with the CVAT
+                server.
+            task_id: The numerical ID of the task.
         """
+        self.__cli = cvat_cli
+        self.__task_id = task_id
+
         # Open the project.
         logger.debug("Opening project under {}.", project_dir)
         self.__project = Project.load(project_dir.as_posix())
+
+    @contextmanager
+    def __download_image(self, frame_num: int, output_dir: Path) -> Path:
+        """
+        Downloads an image from the CVAT server. This is meant to be used as
+        a context manager; the downloaded image will be deleted upon exit.
+
+        Args:
+            frame_num: The number of the frame to load.
+            output_dir: The directory to save the downloaded image in.
+
+        Returns:
+            The path to the image that it downloaded.
+
+        """
+        # Download the image.
+        logger.debug("Downloading image for frame {}.", frame_num)
+        self.__cli.tasks_frame(
+            self.__task_id,
+            frame_ids=[frame_num],
+            outdir=output_dir,
+            quality="original",
+        )
+
+        # The image is saved in this format.
+        image_name = f"task_{self.__task_id}_frame_{frame_num:06d}.jpg"
+        image_path = output_dir / image_name
+
+        try:
+            yield image_path
+
+        finally:
+            # Delete the downloaded image.
+            logger.debug("Deleting downloaded frame {}.", image_path)
+            image_path.unlink()
 
     @cached_property
     def dataset(self) -> ProjectDataset:
@@ -112,3 +153,27 @@ class Task:
             The `Dataset` for the loaded task.
         """
         return self.__project.make_dataset()
+
+    @lru_cache(maxsize=_MAX_IMAGES_TO_CACHE)
+    def get_image(self, frame_num: int) -> np.ndarray:
+        """
+        Loads a particular image from the CVAT server.
+
+        Args:
+            frame_num: The number of the frame to load.
+
+        Returns:
+            The image that it loaded.
+
+        """
+        with ExitStack() as exit_stack:
+            # Download the image to a temporary directory.
+            image_dir = Path(
+                exit_stack.enter_context(tempfile.TemporaryDirectory())
+            )
+            image_path = exit_stack.enter_context(
+                self.__download_image(frame_num, image_dir)
+            )
+
+            # Load the image data.
+            return load_image(image_path.as_posix()).astype(np.uint8)
