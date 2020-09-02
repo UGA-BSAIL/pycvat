@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cvat-tracker"
-version = "0.1.0"
+version = "0.2.0"
 description = "Tool for automating annotations done with CVAT."
 authors = ["Daniel Petti <djpetti@gmail.com>"]
 license = "MIT"

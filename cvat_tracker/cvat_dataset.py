@@ -1,5 +1,5 @@
 """
-High-level API for obtaining frames and annotations.
+High-level API for obtaining and updating frames and annotations.
 """
 
 
@@ -17,16 +17,16 @@ from .task import Task
 from .task_metadata import TaskMetadata
 
 
-class FrameProvider:
+class CvatDataset:
     """
-    High-level API for obtaining frames and annotations.
+    High-level API for obtaining and updating frames and annotations.
     """
 
     @classmethod
     @contextmanager
-    def for_task(cls, *, task_id: int, auth: Authenticator) -> "FrameProvider":
+    def for_task(cls, *, task_id: int, auth: Authenticator) -> "CvatDataset":
         """
-        Creates a new `FrameProvider` for the specified task. Meant to be
+        Creates a new `CvatDataset` for the specified task. Meant to be
         used as a context manager. It will automatically re-upload the
         project to the server upon exit.
 
@@ -35,7 +35,7 @@ class FrameProvider:
             auth: The object to use for authenticating with CVAT.
 
         Returns:
-            The `FrameProvider` object that it created.
+            The `CvatDataset` object that it created.
         """
         metadata = TaskMetadata(task_id=task_id, auth=auth)
 

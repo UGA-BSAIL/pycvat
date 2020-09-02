@@ -11,7 +11,7 @@ import numpy as np
 from datumaro.components.extractor import Points
 from loguru import logger
 
-from .frame_provider import FrameProvider
+from .cvat_dataset import CvatDataset
 
 
 class Tracker:
@@ -42,10 +42,10 @@ class Tracker:
     Value of K for KNN matching.
     """
 
-    def __init__(self, provider: FrameProvider):
+    def __init__(self, provider: CvatDataset):
         """
         Args:
-            provider: The `FrameProvider` to source data from for tracking.
+            provider: The `CvatDataset` to source data from for tracking.
         """
         self.__provider = provider
 
