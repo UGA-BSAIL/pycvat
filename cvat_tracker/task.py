@@ -3,14 +3,17 @@ Manages downloading and opening annotations from a CVAT task.
 """
 
 
+import shutil
 import tempfile
 from contextlib import ExitStack, contextmanager
 from functools import cached_property
 from pathlib import Path
+from typing import ContextManager
 from zipfile import ZipFile
 
 import numpy as np
 from datumaro.components.project import Project, ProjectDataset
+from datumaro.plugins.cvat_format.converter import CvatConverter
 from datumaro.util.image import load_image
 from loguru import logger
 from methodtools import lru_cache
@@ -35,7 +38,9 @@ class Task:
     """
 
     @classmethod
-    def __load_zip(cls, *, zip_file: Path, extract_to: Path) -> Path:
+    def __load_zip(
+        cls, *, zip_file: Path, extract_to: Path
+    ) -> ContextManager[Path]:
         """
         Loads task data from a downloaded Datumaro zip file.
 
@@ -61,7 +66,9 @@ class Task:
 
     @classmethod
     @contextmanager
-    def download(cls, *, task_id: int, auth: Authenticator) -> "Task":
+    def download(
+        cls, *, task_id: int, auth: Authenticator
+    ) -> ContextManager["Task"]:
         """
         Automatically downloads a task from a CVAT server. It is meant to be
         used as a context manager.
@@ -111,8 +118,24 @@ class Task:
         logger.debug("Opening project under {}.", project_dir)
         self.__project = Project.load(project_dir.as_posix())
 
+        self.__remove_external_sources()
+
+    def __remove_external_sources(self) -> None:
+        """
+        Removes all external sources from the project. We do this because we
+        download the images manually, and only want to use *local* annotation
+        data from the project.
+
+        """
+        source_names = list(self.__project.env.sources.items.keys())
+        for source_name in source_names:
+            logger.debug("Removing project source '{}'.", source_name)
+            self.__project.remove_source(source_name)
+
     @contextmanager
-    def __download_image(self, frame_num: int, output_dir: Path) -> Path:
+    def __download_image(
+        self, frame_num: int, output_dir: Path
+    ) -> ContextManager[Path]:
         """
         Downloads an image from the CVAT server. This is meant to be used as
         a context manager; the downloaded image will be deleted upon exit.
@@ -146,6 +169,36 @@ class Task:
             logger.debug("Deleting downloaded frame {}.", image_path)
             image_path.unlink()
 
+    @contextmanager
+    def __make_zip(self) -> ContextManager[Path]:
+        """
+        Creates a zipped version of the project directory.
+
+        Returns:
+            The path to the zip file that it created. It will be deleted upon
+            exit from the context.
+        """
+        with tempfile.TemporaryDirectory() as output_dir:
+            output_dir = Path(output_dir)
+            project_dir = output_dir / "project_cvat"
+            project_dir.mkdir()
+            zip_path = output_dir / "project_cvat_zip"
+
+            # Save to CVAT format.
+            converter = CvatConverter()
+            self.dataset.export_project(
+                save_dir=project_dir, converter=converter
+            )
+
+            # Create the archive.
+            archive_name = shutil.make_archive(
+                zip_path, "zip", root_dir=project_dir
+            )
+            archive_path = output_dir / archive_name
+            logger.debug("Created project archive {}.", archive_path)
+
+            yield archive_path
+
     @cached_property
     def dataset(self) -> ProjectDataset:
         """
@@ -177,3 +230,19 @@ class Task:
 
             # Load the image data.
             return load_image(image_path.as_posix()).astype(np.uint8)
+
+    def upload(self) -> None:
+        """
+        Uploads the current version of the project to CVAT.
+        """
+        logger.info("Uploading project...")
+
+        # Make sure the project is updated on the disk.
+        self.__project.save()
+        # Create a zip of the project.
+        with self.__make_zip() as zip_path:
+            self.__cli.tasks_upload(
+                self.__task_id, "CVAT 1.1", zip_path.as_posix()
+            )
+
+        logger.info("Project uploaded.")

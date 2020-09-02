@@ -228,7 +228,7 @@ class Tracker:
 
         # Convert back to the Datumaro format.
         return self.__cv_to_annotations(
-            cv_points=cv_points, original_annotations=annotations,
+            cv_points=next_points, original_annotations=annotations,
         )
 
     @staticmethod
@@ -283,6 +283,7 @@ class Tracker:
             new_points = flat_points[
                 flat_point_index : (flat_point_index + num_points)
             ]
+            flat_point_index += num_points
 
             # Carry over all the metadata from the original annotation.
             annotation = Points(
@@ -302,7 +303,8 @@ class Tracker:
         self, start_frame: int = 0, show_result: bool = False
     ) -> List[Points]:
         """
-        Tracks each annotation in the initial frame forward by one frame.
+        Tracks each annotation in the initial frame forward by one frame. The
+        updated annotations will automatically be saved in the dataset.
 
         Args:
             start_frame: The frame number to start tracking at.
@@ -329,5 +331,10 @@ class Tracker:
 
         # Merge the propagated annotations with any existing ones.
         updated_annotations = next_annotations + propagated_annotations
+
+        # Save the annotations.
+        self.__provider.update_annotations(
+            start_frame + 1, updated_annotations
+        )
 
         return updated_annotations
