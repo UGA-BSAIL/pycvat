@@ -52,6 +52,13 @@ def _make_parser() -> ArgumentParser:
         "-f", "--frame", type=int, help="The frame to start tracking at."
     )
 
+    parser.add_argument(
+        "--show-result",
+        action="store_true",
+        help="Enables a debugging display that shows the transformed "
+        "annotations.",
+    )
+
     return parser
 
 
@@ -72,4 +79,6 @@ def main() -> None:
 
         # Update the annotations with tracking.
         tracker = Tracker(provider)
-        tracker.track_forward(start_frame=args.frame)
+        tracker.track_forward(
+            start_frame=args.frame, show_result=args.show_result
+        )

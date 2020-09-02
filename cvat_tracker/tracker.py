@@ -182,11 +182,19 @@ class Tracker:
         Returns:
             The location of the points in `next_frame`.
         """
-        # Calculate the projection matrix between the two frames.
-        projection = self.__find_projection(previous_frame, next_frame)
+        # Downsize the frames to speed up the matching process.
+        previous_frame_small = cv2.pyrDown(previous_frame)
+        next_frame_small = cv2.pyrDown(next_frame)
 
-        # Use it to project the annotations.
-        return cv2.perspectiveTransform(points, projection)
+        # Calculate the projection matrix between the two frames.
+        projection = self.__find_projection(
+            previous_frame_small, next_frame_small
+        )
+
+        # Use it to project the annotations. Since our images were
+        # down-sampled, we have to transform the points as well.
+        points_small = points / 2
+        return cv2.perspectiveTransform(points_small, projection) * 2
 
     def __track_annotations(
         self,

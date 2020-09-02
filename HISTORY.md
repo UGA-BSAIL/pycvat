@@ -5,3 +5,7 @@
 ### v0.2.0 (2020-09-02)
 
 - MVP with working CLI.
+
+### v0.2.1 (2020-09-02)
+
+- Speed up image processing.
