@@ -11,7 +11,7 @@ import numpy as np
 from datumaro.components.extractor import Points
 from loguru import logger
 
-from .cvat_dataset import CvatDataset
+from .backend.cvat_dataset import CvatDataset
 
 
 class Tracker:
@@ -42,17 +42,18 @@ class Tracker:
     Value of K for KNN matching.
     """
 
-    def __init__(self, provider: CvatDataset):
+    def __init__(self, dataset: CvatDataset):
         """
         Args:
-            provider: The `CvatDataset` to source data from for tracking.
+            dataset: The `CvatDataset` to source data from for tracking.
         """
-        self.__provider = provider
+        self.__dataset = dataset
 
         # Create a SIFT extractor and matcher to use.
         self.__sift = cv2.SIFT_create()
         self.__matcher = cv2.FlannBasedMatcher_create()
 
+    # Not covered because this is purely for debugging.
     @classmethod
     def __plot_annotations(
         cls,
@@ -61,7 +62,7 @@ class Tracker:
         new_points: np.ndarray,
         previous_frame: np.ndarray,
         next_frame: np.ndarray,
-    ) -> None:
+    ) -> None:  # pragma: no cover
         """
         Debugging method that plots the original and projected annotations.
 
@@ -225,7 +226,8 @@ class Tracker:
             previous_frame, next_frame, cv_points
         )
 
-        if show_result:
+        # Not tested because this is only for debugging.
+        if show_result:  # pragma: no cover
             # Display the tracking result.
             self.__plot_annotations(
                 old_points=cv_points,
@@ -319,15 +321,16 @@ class Tracker:
             show_result: Whether to display the tracking result for debugging
                 purposes.
 
-        Yields:
+        Returns:
             An amended list of annotations for the subsequent frame.
 
         """
-        frame_data = self.__provider.iter_frames_and_annotations(
+        frame_data = self.__dataset.iter_frames_and_annotations(
             start_at=start_frame
         )
-        first_frame, first_annotations = next(iter(frame_data))
-        next_frame, next_annotations = next(iter(frame_data))
+        frame_iter = iter(frame_data)
+        first_frame, first_annotations = next(frame_iter)
+        next_frame, next_annotations = next(frame_iter)
 
         # Propagate the annotations forward.
         propagated_annotations = self.__track_annotations(
@@ -341,8 +344,6 @@ class Tracker:
         updated_annotations = next_annotations + propagated_annotations
 
         # Save the annotations.
-        self.__provider.update_annotations(
-            start_frame + 1, updated_annotations
-        )
+        self.__dataset.update_annotations(start_frame + 1, updated_annotations)
 
         return updated_annotations

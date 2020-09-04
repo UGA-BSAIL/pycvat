@@ -8,8 +8,8 @@ from contextlib import ExitStack
 
 from loguru import logger
 
-from .api import Authenticator
-from .cvat_dataset import CvatDataset
+from .backend.api import Authenticator
+from .backend.cvat_dataset import CvatDataset
 from .tracker import Tracker
 
 
