@@ -203,6 +203,6 @@ class TestTracker:
         # Assert.
         # Serialize the new annotation points.
         annotation_points = [a.points for a in updated_annotations]
-        serial_points = json.dumps(annotation_points)
+        serial_points = json.dumps(annotation_points, indent=0)
 
         snapshot.assert_match(serial_points, "annotation_points.json")

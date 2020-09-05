@@ -35,6 +35,15 @@ class Authenticator:
     Encapsulates the login procedure for the CVAT API server.
     """
 
+    AUTH_TOKEN_NAME = "csrftoken"
+    """
+    The name of the token field used in the login response.
+    """
+    AUTH_TOKEN_HEADER_NAME = "X-CSRFToken"
+    """
+    The name of the header used to store the login token.
+    """
+
     @classmethod
     @contextmanager
     def from_new_session(cls, **kwargs: Any) -> "Authenticator":
@@ -88,10 +97,10 @@ class Authenticator:
         response = self.__session.post(login_url, credentials)
         response.raise_for_status()
 
-        if "csrftoken" in response.cookies:
-            self.__session.headers["X-CSRFToken"] = response.cookies[
-                "csrftoken"
-            ]
+        if self.AUTH_TOKEN_NAME in response.cookies:
+            self.__session.headers[
+                self.AUTH_TOKEN_HEADER_NAME
+            ] = response.cookies[self.AUTH_TOKEN_NAME]
 
         return self.__session
 

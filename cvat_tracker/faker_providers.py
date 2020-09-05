@@ -6,7 +6,8 @@ Custom `Faker` providers that we use for testing.
 import unittest.mock as mock
 from typing import Any, List, Tuple
 
-from datumaro.components.extractor import Points
+from datumaro.components.extractor import DatasetItem, Points
+from datumaro.util.image import Image
 from faker import Faker
 from faker.providers import BaseProvider
 
@@ -110,3 +111,36 @@ class CvatProvider(BaseProvider):
             annotations.append(self.points_annotation(*args, **kwargs))
 
         return annotations
+
+    def dataset_item(self, allow_no_images: bool = True) -> DatasetItem:
+        """
+        Creates a fake `DatasetItem`.
+
+        Args:
+            allow_no_images: If true, it will allow the `DatasetItem` to have
+                no associated image. Otherwise, it will always have an
+                associated image.
+
+        Returns:
+            The fake `DatasetItem` that it created.
+
+        """
+        item = mock.create_autospec(DatasetItem, instance=True)
+
+        item.id = self.__faker.pystr()
+        item.subset = self.random_int()
+        item.path = self.__faker.file_path()
+        item.annotations = self.points_annotations()
+
+        # Determine whether to include an image.
+        if allow_no_images and self.__faker.pybool():
+            # No image.
+            item.image = None
+            item.has_image = False
+        else:
+            # Create a fake image.
+            item.image = mock.create_autospec(Image, instance=True)
+            item.image.path = item.path
+            item.has_image = True
+
+        return item
