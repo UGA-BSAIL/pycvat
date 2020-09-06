@@ -11,7 +11,7 @@ import numpy as np
 from datumaro.components.extractor import Points
 from loguru import logger
 
-from ..dataset import CvatDataset
+from ..dataset import CvatHandle
 
 
 class Tracker:
@@ -42,10 +42,10 @@ class Tracker:
     Value of K for KNN matching.
     """
 
-    def __init__(self, dataset: CvatDataset):
+    def __init__(self, dataset: CvatHandle):
         """
         Args:
-            dataset: The `CvatDataset` to source data from for tracking.
+            dataset: The `CvatHandle` to source data from for tracking.
         """
         self.__dataset = dataset
 
@@ -314,7 +314,7 @@ class Tracker:
     ) -> List[Points]:
         """
         Tracks each annotation in the initial frame forward by one frame. The
-        updated annotations will automatically be saved in the dataset.
+        updated annotations will automatically be saved in the cvat.
 
         Args:
             start_frame: The frame number to start tracking at.

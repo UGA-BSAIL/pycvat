@@ -17,16 +17,16 @@ from .task import Task
 from .task_metadata import TaskMetadata
 
 
-class CvatDataset:
+class CvatHandle:
     """
     High-level API for obtaining and updating frames and annotations.
     """
 
     @classmethod
     @contextmanager
-    def for_task(cls, *, task_id: int, auth: Authenticator) -> "CvatDataset":
+    def for_task(cls, *, task_id: int, auth: Authenticator) -> "CvatHandle":
         """
-        Creates a new `CvatDataset` for the specified task. Meant to be
+        Creates a new `CvatHandle` instance for the specified task. Meant to be
         used as a context manager. It will automatically re-upload the
         project to the server upon exit.
 
@@ -35,7 +35,7 @@ class CvatDataset:
             auth: The object to use for authenticating with CVAT.
 
         Returns:
-            The `CvatDataset` object that it created.
+            The `CvatHandle` object that it created.
         """
         metadata = TaskMetadata(task_id=task_id, auth=auth)
 
@@ -126,3 +126,13 @@ class CvatDataset:
             image=item.image,
         )
         self.__task.dataset.put(updated_item)
+
+    def upload_now(self) -> None:
+        """
+        Forces an immediate update of this data on the CVAT server. (If the
+        instance was created with `for_task()`, this will be done
+        automatically when exiting the context manager, and there is
+        therefore no need to do it manually.)
+
+        """
+        self.__task.upload()

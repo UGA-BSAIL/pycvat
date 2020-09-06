@@ -8,8 +8,8 @@ from contextlib import ExitStack
 
 from loguru import logger
 
-from .dataset.api import Authenticator
-from .dataset.cvat_dataset import CvatDataset
+from ..dataset.api import Authenticator
+from ..dataset.cvat_handle import CvatHandle
 from .tracker import Tracker
 
 
@@ -74,7 +74,7 @@ def main() -> None:
             )
         )
         provider = exit_stack.enter_context(
-            CvatDataset.for_task(task_id=args.task_id, auth=auth)
+            CvatHandle.for_task(task_id=args.task_id, auth=auth)
         )
 
         # Update the annotations with tracking.

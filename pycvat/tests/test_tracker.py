@@ -9,12 +9,13 @@ import unittest.mock as mock
 import cv2
 import numpy as np
 import pytest
+import yaml
 from faker import Faker
 from pydantic.dataclasses import dataclass
 from pytest_mock import MockFixture
 from pytest_snapshot.plugin import Snapshot
 
-from pycvat.dataset.cvat_dataset import CvatDataset
+from pycvat.dataset.cvat_handle import CvatHandle
 from pycvat.tracking import tracker
 from pycvat.type_helpers import ArbitraryTypesConfig
 
@@ -33,7 +34,7 @@ class TestTracker:
 
         Attributes:
             tracker: The `Tracker` instance under test.
-            mock_dataset: The mocked `CvatDataset` to use with the tracker.
+            mock_dataset: The mocked `CvatHandle` to use with the tracker.
             mock_sift: The mocked OpenCV SIFT object.
             mock_matcher: The mocked OpenCV feature matcher.
             mock_points_class: The mocked CVAT `Points` class.
@@ -44,7 +45,7 @@ class TestTracker:
         """
 
         tracker: tracker.Tracker
-        mock_dataset: CvatDataset
+        mock_dataset: CvatHandle
         mock_sift: mock.Mock
         mock_matcher: mock.Mock
         mock_points_class: mock.Mock
@@ -66,7 +67,7 @@ class TestTracker:
 
         """
         # Mock the dependencies.
-        mock_dataset = mocker.create_autospec(CvatDataset, instance=True)
+        mock_dataset = mocker.create_autospec(CvatHandle, instance=True)
         mock_sift_create = mocker.patch("cv2.SIFT_create")
         mock_sift = mock_sift_create.return_value
         mock_matcher_create = mocker.patch("cv2.FlannBasedMatcher_create")
@@ -187,8 +188,8 @@ class TestTracker:
         annotations_1 = faker.points_annotations(frame_shape=frame_1.shape)
         annotations_2 = faker.points_annotations(frame_shape=frame_2.shape)
 
-        # Mock the dataset so that it reads real frames.
-        mock_dataset = mocker.create_autospec(CvatDataset, instance=True)
+        # Mock the cvat so that it reads real frames.
+        mock_dataset = mocker.create_autospec(CvatHandle, instance=True)
         mock_dataset.iter_frames_and_annotations.return_value = [
             (frame_1, annotations_1),
             (frame_2, annotations_2),
@@ -203,9 +204,6 @@ class TestTracker:
         # Assert.
         # Serialize the new annotation points.
         annotation_points = [a.points for a in updated_annotations]
-        serial_points = json.dumps(annotation_points)
-        # JSON sometimes does weird things with newlines so we remove them
-        # before saving.
-        serial_points = serial_points.replace("\n", "")
+        serial_points = yaml.dump(annotation_points, Dumper=yaml.Dumper)
 
-        snapshot.assert_match(serial_points, "annotation_points.json")
+        snapshot.assert_match(serial_points, "annotation_points.yaml")
