@@ -167,7 +167,7 @@ class Task:
         finally:
             # Delete the downloaded image.
             logger.debug("Deleting downloaded frame {}.", image_path)
-            image_path.unlink()
+            image_path.unlink(missing_ok=True)
 
     @contextmanager
     def __make_zip(self) -> ContextManager[Path]:
@@ -244,8 +244,6 @@ class Task:
         """
         logger.info("Uploading project...")
 
-        # Make sure the project is updated on the disk.
-        self.__project.save()
         # Create a zip of the project.
         with self.__make_zip() as zip_path:
             self.__cli.tasks_upload(
