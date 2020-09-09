@@ -9,3 +9,7 @@
 ### v0.2.1 (2020-09-02)
 
 - Speed up image processing.
+
+### v0.3.0 (2020-09-09)
+
+- Add support for Kedro datasets.
