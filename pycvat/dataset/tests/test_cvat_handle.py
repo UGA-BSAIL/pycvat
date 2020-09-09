@@ -76,8 +76,15 @@ class TestCvatHandle:
     @pytest.mark.parametrize(
         "frame_num", [0, 5], ids=["frame_num_0", "frame_num_5"]
     )
+    @pytest.mark.parametrize(
+        "compressed", [False, True], ids=["not_compressed", "compressed"]
+    )
     def test_iter_frames_and_annotations(
-        self, config: ConfigForTests, faker: Faker, frame_num: int
+        self,
+        config: ConfigForTests,
+        faker: Faker,
+        frame_num: int,
+        compressed: bool,
     ) -> None:
         """
         Tests that `iter_frames_and_annotations` works.
@@ -86,6 +93,7 @@ class TestCvatHandle:
             config: The configuration to use for testing.
             faker: The fixture to use for generating fake data.
             frame_num: The frame number to test iterating from.
+            compressed: Whether to get a compressed image.
 
         """
         # Arrange.
@@ -104,7 +112,7 @@ class TestCvatHandle:
 
         # Act.
         pairs_iter = config.cvat.iter_frames_and_annotations(
-            start_at=frame_num
+            start_at=frame_num, compressed=compressed
         )
         frame, annotations = next(iter(pairs_iter))
 
@@ -114,7 +122,9 @@ class TestCvatHandle:
         assert annotations == item1.annotations
 
         # It should have gotten the right frame.
-        config.mock_task.get_image.assert_called_once_with(frame_num)
+        config.mock_task.get_image.assert_called_once_with(
+            frame_num, compressed=compressed
+        )
         # It should have gotten the right frame metadata.
         config.mock_task_metadata.frame_path.assert_called_once_with(frame_num)
 
@@ -206,3 +216,14 @@ class TestCvatHandle:
 
         # Assert.
         config.mock_task.upload.assert_called_once_with()
+
+    def test_num_frames(self, config: ConfigForTests) -> None:
+        """
+        Tests that `num_frames` works.
+
+        Args:
+            config: The configuration to use for testing.
+
+        """
+        # Act and assert.
+        assert config.cvat.num_frames == config.mock_task_metadata.num_frames

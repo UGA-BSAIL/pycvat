@@ -208,12 +208,16 @@ class Task:
         return self.__project.make_dataset()
 
     @lru_cache(maxsize=_MAX_IMAGES_TO_CACHE)
-    def get_image(self, frame_num: int) -> np.ndarray:
+    def get_image(
+        self, frame_num: int, compressed: bool = False
+    ) -> np.ndarray:
         """
         Loads a particular image from the CVAT server.
 
         Args:
             frame_num: The number of the frame to load.
+            compressed: If true, it will return the raw JPEG data instead of
+                loading it.
 
         Returns:
             The image that it loaded.
@@ -228,8 +232,11 @@ class Task:
                 self.__download_image(frame_num, image_dir)
             )
 
-            # Load the image data.
-            return load_image(image_path.as_posix()).astype(np.uint8)
+            if not compressed:
+                # Load the image data.
+                return load_image(image_path.as_posix()).astype(np.uint8)
+            else:
+                return np.fromfile(image_path.as_posix(), dtype=np.uint8)
 
     def upload(self) -> None:
         """

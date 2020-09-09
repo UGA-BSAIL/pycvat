@@ -6,7 +6,7 @@ High-level API for obtaining and updating frames and annotations.
 from contextlib import contextmanager
 from functools import cached_property
 from pathlib import Path
-from typing import Dict, Iterable, List, Tuple
+from typing import Any, Dict, Iterable, List, Tuple
 
 import numpy as np
 from datumaro.components.extractor import DatasetItem
@@ -87,23 +87,69 @@ class CvatHandle:
         ), f"Could not find any dataset entry for image {frame_path}."
         return self.__paths_to_items[frame_path]
 
-    def iter_frames_and_annotations(
-        self, start_at: int = 0
-    ) -> Iterable[Tuple[np.ndarray, List]]:
+    def get_frame(
+        self, frame_num: int, compressed: bool = False
+    ) -> np.ndarray:
+        """
+        Gets a single frame.
+
+        Args:
+            frame_num: The frame number to get.
+            compressed: If true, it will return the raw JPEG image instead
+                of decompressing them.
+
+        Returns:
+            The frame data.
+
+        """
+        return self.__task.get_image(frame_num, compressed=compressed)
+
+    def iter_frames(
+        self, start_at: int = 0, **kwargs: Any
+    ) -> Iterable[np.ndarray]:
+        """
+        Args:
+            start_at: The frame number to start iterating at.
+            kwargs: Will be forwarded to `get_frame()`.
+
+        Yields:
+            Each frame image, in order.
+
+        """
+        for frame_num in range(start_at, self.num_frames):
+            yield self.get_frame(frame_num, **kwargs)
+
+    def iter_annotations(self, start_at: int = 0) -> Iterable[List]:
         """
         Args:
             start_at: The frame number to start iterating at.
 
         Yields:
-            Each frame, and the corresponding list of annotation objects for
-            that frame. Frames will be iterated in order.
+            The corresponding list of annotation objects for
+            that frame, in order.
         """
-        for frame_num in range(start_at, self.__task_meta.num_frames):
-            frame_data = self.__task.get_image(frame_num)
+        for frame_num in range(start_at, self.num_frames):
             # Get the associated annotations.
             item = self.__get_item_for_frame(frame_num)
+            yield item.annotations
 
-            yield frame_data, item.annotations
+    def iter_frames_and_annotations(
+        self, start_at: int = 0, **kwargs: Any
+    ) -> Iterable[Tuple[np.ndarray, List]]:
+        """
+        API shortcut for iterating frames and annotations simultaneously.
+
+        Args:
+            start_at: The frame number to start iterating at.
+            kwargs: Will be forwarded to `iter_frames()`.
+
+        Yields:
+            Tuples of each frame and corresponding annotations.
+
+        """
+        frame_iter = self.iter_frames(start_at=start_at, **kwargs)
+        annotations_iter = self.iter_annotations(start_at=start_at)
+        return zip(frame_iter, annotations_iter)
 
     def update_annotations(self, frame_num: int, annotations: List) -> None:
         """
@@ -136,3 +182,11 @@ class CvatHandle:
 
         """
         self.__task.upload()
+
+    @property
+    def num_frames(self) -> int:
+        """
+        Returns:
+            The total number of frames in the dataset.
+        """
+        return self.__task_meta.num_frames

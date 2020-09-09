@@ -70,9 +70,10 @@ class TestCvatDataSet:
         user = faker.profile(["username"])["username"]
         password = faker.pystr()
         host = faker.hostname()
+        credentials = dict(username=user, password=password)
 
         data_set = cvat_data_set.CvatDataSet(
-            task_id=task_id, user=user, password=password, host=host
+            task_id=task_id, credentials=credentials, host=host
         )
 
         return cls.ConfigForTests(
@@ -87,7 +88,7 @@ class TestCvatDataSet:
 
     def test_init(self, config: ConfigForTests) -> None:
         """
-        Tests that it intialized that `CvatDataSet` properly.
+        Tests that it initialized that `CvatDataSet` properly.
 
         Args:
             config: The configuration to use for testing.

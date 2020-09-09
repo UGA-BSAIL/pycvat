@@ -21,20 +21,28 @@ class CvatDataSet(AbstractDataSet):
         self,
         *,
         task_id: int,
-        user: str,
-        password: str,
+        credentials: Dict[str, str],
         host: str = "localhost:8080"
     ):
         """
         Args:
             task_id: The numerical ID of the task to load data from.
-            user: The name of the user to log into CVAT as.
-            password: The password for that user.
+            credentials: Credentials to use for logging into CVAT. Should
+                contain two keys: "username", which is the name of the user
+                to log in as, and "password", which is the password for that
+                user.
             host: The address of the CVAT server to connect to.
         """
+        assert (
+            "username" in credentials
+        ), "'username' must be specified in CVAT credentials."
+        assert (
+            "password" in credentials
+        ), "'password' must be specified in CVAT credentials."
+
         self.__task_id = task_id
-        self.__user = user
-        self.__password = password
+        self.__user = credentials["username"]
+        self.__password = credentials["password"]
         self.__host = host
 
         self.__cvat, self.__cvat_context = self.__init_cvat_handle()
