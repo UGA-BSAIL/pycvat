@@ -8,8 +8,8 @@ from contextlib import ExitStack
 
 from loguru import logger
 
-from .backend.api import Authenticator
-from .backend.cvat_dataset import CvatDataset
+from .dataset.api import Authenticator
+from .dataset.cvat_dataset import CvatDataset
 from .tracker import Tracker
 
 
@@ -19,7 +19,7 @@ def _make_parser() -> ArgumentParser:
         The parser to use for parsing CLI arguments.
     """
     parser = ArgumentParser(
-        prog="cvat_tracker",
+        prog="pycvat",
         description="Program that uses tracking to propagate annotations from "
         "one frame to the next.",
     )

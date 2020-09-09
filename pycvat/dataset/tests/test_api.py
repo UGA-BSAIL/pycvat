@@ -11,8 +11,8 @@ from faker import Faker
 from pydantic.dataclasses import dataclass
 from pytest_mock import MockFixture
 
-from cvat_tracker.backend import api
-from cvat_tracker.type_helpers import ArbitraryTypesConfig
+from pycvat.dataset import api
+from pycvat.type_helpers import ArbitraryTypesConfig
 
 
 class TestExtendedApi:

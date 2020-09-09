@@ -14,9 +14,9 @@ from pydantic.dataclasses import dataclass
 from pytest_mock import MockFixture
 from pytest_snapshot.plugin import Snapshot
 
-from cvat_tracker import tracker
-from cvat_tracker.backend.cvat_dataset import CvatDataset
-from cvat_tracker.type_helpers import ArbitraryTypesConfig
+from pycvat.dataset.cvat_dataset import CvatDataset
+from pycvat.tracking import tracker
+from pycvat.type_helpers import ArbitraryTypesConfig
 
 from .test_images import FRAME_1_PATH, FRAME_2_PATH
 
@@ -203,6 +203,9 @@ class TestTracker:
         # Assert.
         # Serialize the new annotation points.
         annotation_points = [a.points for a in updated_annotations]
-        serial_points = json.dumps(annotation_points, indent=0)
+        serial_points = json.dumps(annotation_points)
+        # JSON sometimes does weird things with newlines so we remove them
+        # before saving.
+        serial_points = serial_points.replace("\n", "")
 
         snapshot.assert_match(serial_points, "annotation_points.json")

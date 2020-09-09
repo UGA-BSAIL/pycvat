@@ -11,11 +11,11 @@ from faker import Faker
 from pydantic.dataclasses import dataclass
 from pytest_mock import MockFixture
 
-from cvat_tracker.backend import cvat_dataset
-from cvat_tracker.backend.api import Authenticator
-from cvat_tracker.backend.task import Task
-from cvat_tracker.backend.task_metadata import TaskMetadata
-from cvat_tracker.type_helpers import ArbitraryTypesConfig
+from pycvat.dataset import cvat_dataset
+from pycvat.dataset.api import Authenticator
+from pycvat.dataset.task import Task
+from pycvat.dataset.task_metadata import TaskMetadata
+from pycvat.type_helpers import ArbitraryTypesConfig
 
 
 class TestCvatDataset:

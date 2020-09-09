@@ -11,7 +11,7 @@ import numpy as np
 from datumaro.components.extractor import Points
 from loguru import logger
 
-from .backend.cvat_dataset import CvatDataset
+from ..dataset import CvatDataset
 
 
 class Tracker:
