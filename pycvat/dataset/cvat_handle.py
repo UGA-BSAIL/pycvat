@@ -104,6 +104,19 @@ class CvatHandle:
         """
         return self.__task.get_image(frame_num, compressed=compressed)
 
+    def get_frame_size(self, frame_num: int) -> Tuple[int, int]:
+        """
+        Gets the size of a particular frame.
+
+        Args:
+            frame_num: The frame number to get the size of.
+
+        Returns:
+            The size in pixels, as (width, height).
+
+        """
+        return self.__task_meta.frame_size(frame_num)
+
     def iter_frames(
         self, start_at: int = 0, **kwargs: Any
     ) -> Iterable[np.ndarray]:

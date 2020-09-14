@@ -5,7 +5,7 @@ Parses metadata for a task.
 
 from functools import cached_property
 from pathlib import Path
-from typing import Dict, List
+from typing import Any, Dict, List, Tuple
 
 from loguru import logger
 
@@ -45,6 +45,25 @@ class TaskMetadata:
         )
         return metadata_json["frames"]
 
+    def __frame_meta(self, frame_num: int) -> Dict[str, Any]:
+        """
+        Gets the associated metadata structure for a particular frame.
+
+        Args:
+            frame_num: The frame number to get metadata for.
+
+        Returns:
+            The metadata dictionary that it retrieved.
+
+        """
+        frame_data = self.__metadata
+        assert frame_num < self.num_frames, (
+            f"Requested frame number {frame_num}, but only have "
+            f"{self.num_frames} frames."
+        )
+
+        return frame_data[frame_num]
+
     def frame_path(self, frame_num: int) -> Path:
         """
         Gets the path to a particular frame.
@@ -56,13 +75,21 @@ class TaskMetadata:
             The path to the frame.
 
         """
-        frame_data = self.__metadata
-        assert frame_num < self.num_frames, (
-            f"Requested frame number {frame_num}, but only have "
-            f"{self.num_frames} frames."
-        )
+        return Path(self.__frame_meta(frame_num)["name"])
 
-        return Path(frame_data[frame_num]["name"])
+    def frame_size(self, frame_num: int) -> Tuple[int, int]:
+        """
+        Gets the size of a frame.
+
+        Args:
+            frame_num: The frame number to get the size of.
+
+        Returns:
+            The size in pixels as (width, height).
+
+        """
+        frame_meta = self.__frame_meta(frame_num)
+        return frame_meta["width"], frame_meta["height"]
 
     @property
     def num_frames(self) -> int:
