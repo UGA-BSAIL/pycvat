@@ -3,6 +3,7 @@ A Kedro `DataSet` for data from CVAT.
 """
 
 
+import functools
 from contextlib import ExitStack
 from typing import Any, Dict, Tuple
 
@@ -45,8 +46,11 @@ class CvatDataSet(AbstractDataSet):
         self.__password = credentials["password"]
         self.__host = host
 
-        self.__cvat, self.__cvat_context = self.__init_cvat_handle()
+        # CVAT data is lazy-loaded, so this specifies whether the connection
+        # was ever opened.
+        self.__connected_to_cvat = False
 
+    @functools.cached_property
     def __init_cvat_handle(self) -> Tuple[CvatHandle, ExitStack]:
         """
         Initializes the CVAT handle that will be used to access this data.
@@ -66,6 +70,8 @@ class CvatDataSet(AbstractDataSet):
             self.__host,
         )
 
+        self.__connected_to_cvat = True
+
         with ExitStack() as exit_stack:
             auth = exit_stack.enter_context(
                 Authenticator.from_new_session(
@@ -81,10 +87,30 @@ class CvatDataSet(AbstractDataSet):
             context = exit_stack.pop_all()
             return handle, context
 
+    @property
+    def __cvat(self) -> CvatHandle:
+        """
+        Returns:
+            The CVAT handle to use. Will be created if it doesn't already exist.
+        """
+        cvat, _ = self.__init_cvat_handle
+        return cvat
+
+    @property
+    def __cvat_context(self) -> ExitStack:
+        """
+        Returns:
+            The `ExitStack` object that encapsulates callbacks for safely
+            cleaning up the CVAT handle.
+        """
+        _, context = self.__init_cvat_handle
+        return context
+
     def __del__(self) -> None:
         # Clean up the context for the CVAT handle.
-        logger.debug("Cleaning up CVAT handle.")
-        self.__cvat_context.close()
+        if self.__connected_to_cvat:
+            logger.debug("Cleaning up CVAT handle.")
+            self.__cvat_context.close()
 
     def _load(self) -> CvatHandle:
         return self.__cvat

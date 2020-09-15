@@ -2,7 +2,6 @@
 Tests for the `cvat_data_set` module.
 """
 
-
 import unittest.mock as mock
 
 import pytest
@@ -86,15 +85,50 @@ class TestCvatDataSet:
             host=host,
         )
 
-    def test_init(self, config: ConfigForTests) -> None:
+    @pytest.mark.parametrize(
+        "cvat_connected",
+        [False, True],
+        ids=["cvat_not_connected", "cvat_connected"],
+    )
+    def test_del(self, config: ConfigForTests, cvat_connected: bool) -> None:
         """
-        Tests that it initialized that `CvatDataSet` properly.
+        Tests that everything gets cleaned up properly.
+
+        Args:
+            config: The configuration to use for testing.
+            cvat_connected: True if we should have actually connected to the
+                CVAT server, false otherwise.
+
+        """
+        # Arrange.
+        if cvat_connected:
+            # We need to perform a load operation to force it to connect to
+            # CVAT.
+            config.data_set.load()
+
+        # Act.
+        config.data_set.__del__()
+
+        if cvat_connected:
+            # It should have exited the context that it created.
+            config.mock_auth_class.from_new_session.return_value.__exit__.assert_called_once()
+            config.mock_cvat_handle_class.for_task.return_value.__exit__.assert_called_once()
+        else:
+            # It should not have touched the CVAT stuff.
+            config.mock_auth_class.from_new_session.return_value.__exit__.assert_not_called()
+            config.mock_cvat_handle_class.for_task.return_value.__exit__.assert_not_called()
+
+    def test_load(self, config: ConfigForTests) -> None:
+        """
+        Tests that `load()` works.
 
         Args:
             config: The configuration to use for testing.
 
         """
-        # Arrange and Act done in fixtures.
+        # Act.
+        got_data = config.data_set.load()
+
         # Assert.
         # It should have set up the CvatHandle.
         config.mock_auth_class.from_new_session.assert_called_once_with(
@@ -112,33 +146,6 @@ class TestCvatDataSet:
         config.mock_auth_class.from_new_session.return_value.__exit__.assert_not_called()
         config.mock_cvat_handle_class.for_task.return_value.__exit__.assert_not_called()
 
-    def test_del(self, config: ConfigForTests) -> None:
-        """
-        Tests that everything gets cleaned up properly.
-
-        Args:
-            config: The configuration to use for testing.
-
-        """
-        # Act.
-        config.data_set.__del__()
-
-        # It should have exited the context that it created.
-        config.mock_auth_class.from_new_session.return_value.__exit__.assert_called_once()
-        config.mock_cvat_handle_class.for_task.return_value.__exit__.assert_called_once()
-
-    def test_load(self, config: ConfigForTests) -> None:
-        """
-        Tests that `load()` works.
-
-        Args:
-            config: The configuration to use for testing.
-
-        """
-        # Act.
-        got_data = config.data_set.load()
-
-        # Assert.
         # It should have just given us the CVAT handle.
         mock_handle = (
             config.mock_cvat_handle_class.for_task.return_value.__enter__.return_value
