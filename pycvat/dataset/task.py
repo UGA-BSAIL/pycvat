@@ -6,12 +6,12 @@ Manages downloading and opening annotations from a CVAT task.
 import shutil
 import tempfile
 from contextlib import ExitStack, contextmanager
-from functools import cached_property
 from pathlib import Path
 from typing import ContextManager
 from zipfile import ZipFile
 
 import numpy as np
+from cached_property import cached_property
 from datumaro.components.project import Project, ProjectDataset
 from datumaro.plugins.cvat_format.converter import CvatConverter
 from datumaro.util.image import load_image
@@ -167,7 +167,8 @@ class Task:
         finally:
             # Delete the downloaded image.
             logger.debug("Deleting downloaded frame {}.", image_path)
-            image_path.unlink(missing_ok=True)
+            if image_path.exists():
+                image_path.unlink()
 
     @contextmanager
     def __make_zip(self) -> ContextManager[Path]:
@@ -185,9 +186,8 @@ class Task:
             zip_path = output_dir / "project_cvat_zip"
 
             # Save to CVAT format.
-            converter = CvatConverter()
             self.dataset.export_project(
-                save_dir=project_dir, converter=converter
+                save_dir=project_dir, converter=CvatConverter.convert
             )
 
             # Create the archive.

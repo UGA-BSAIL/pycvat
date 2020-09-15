@@ -3,10 +3,10 @@ A Kedro `DataSet` for data from CVAT.
 """
 
 
-import functools
 from contextlib import ExitStack
 from typing import Any, Dict, Tuple
 
+from cached_property import cached_property
 from kedro.io import AbstractDataSet
 from loguru import logger
 
@@ -50,7 +50,7 @@ class CvatDataSet(AbstractDataSet):
         # was ever opened.
         self.__connected_to_cvat = False
 
-    @functools.cached_property
+    @cached_property
     def __init_cvat_handle(self) -> Tuple[CvatHandle, ExitStack]:
         """
         Initializes the CVAT handle that will be used to access this data.

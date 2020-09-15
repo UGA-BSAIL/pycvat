@@ -33,7 +33,6 @@ class TestTask:
             mock_cli: The mocked `CLI` object to use.
             mock_load_image: The mocked `load_image()` function.
             mock_fromfile: The mocked `numpy.fromfile()` function.
-            mock_converter_class: The mocked `CvatConverter` class.
             mock_make_archive: The mocked `shutil.make_archive()` function.
             project_dir: The fake project directory that we used to create
                 the task.
@@ -45,7 +44,6 @@ class TestTask:
         mock_cli: CLI
         mock_load_image: mock.Mock
         mock_fromfile: mock.Mock
-        mock_converter_class: mock.Mock
         mock_make_archive: mock.Mock
 
         project_dir: Path
@@ -70,7 +68,6 @@ class TestTask:
         mock_cli = mocker.create_autospec(CLI, instance=True)
         mock_load_image = mocker.patch(task.__name__ + ".load_image")
         mock_fromfile = mocker.patch("numpy.fromfile")
-        mock_converter_class = mocker.patch(task.__name__ + ".CvatConverter")
         mock_make_archive = mocker.patch("shutil.make_archive")
 
         # Make it look like we have external sources.
@@ -92,7 +89,6 @@ class TestTask:
             task_id=task_id,
             mock_load_image=mock_load_image,
             mock_fromfile=mock_fromfile,
-            mock_converter_class=mock_converter_class,
             mock_make_archive=mock_make_archive,
         )
 
@@ -202,13 +198,14 @@ class TestTask:
             config: The configuration to use for testing.
 
         """
+        # Arrange.
+        # Make it look like make_archive() produces a valid archive name.
+        config.mock_make_archive.return_value = "archive_name"
+
         # Act.
         config.task.upload()
 
         # Assert.
-        # It should have exported the project.
-        config.mock_converter_class.assert_called_once_with()
-
         mock_dataset = (
             config.mock_project_class.load.return_value.make_dataset.return_value
         )

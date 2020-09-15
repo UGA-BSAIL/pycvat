@@ -4,11 +4,11 @@ High-level API for obtaining and updating frames and annotations.
 
 
 from contextlib import contextmanager
-from functools import cached_property
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Tuple
 
 import numpy as np
+from cached_property import cached_property
 from datumaro.components.extractor import DatasetItem
 from loguru import logger
 

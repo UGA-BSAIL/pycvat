@@ -4,10 +4,10 @@ Tools for communicating with the CVAT API.
 
 
 from contextlib import contextmanager
-from functools import cached_property
 from typing import Any, Tuple
 
 import requests
+from cached_property import cached_property
 from loguru import logger
 
 from cvat.utils.cli.core.core import CVAT_API_V1
