@@ -111,6 +111,7 @@ class CvatDataSet(AbstractDataSet):
         if self.__connected_to_cvat:
             logger.debug("Cleaning up CVAT handle.")
             self.__cvat_context.close()
+            self.__connected_to_cvat = False
 
     def _load(self) -> CvatHandle:
         return self.__cvat

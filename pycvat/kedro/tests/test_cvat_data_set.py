@@ -75,7 +75,7 @@ class TestCvatDataSet:
             task_id=task_id, credentials=credentials, host=host
         )
 
-        return cls.ConfigForTests(
+        yield cls.ConfigForTests(
             data_set=data_set,
             mock_auth_class=mock_auth_class,
             mock_cvat_handle_class=mock_cvat_handle_class,
@@ -84,6 +84,10 @@ class TestCvatDataSet:
             password=password,
             host=host,
         )
+
+        # Manually call the destructor before the mocks exit scope, since it
+        # needs the mocks to be active to work.
+        data_set.__del__()
 
     @pytest.mark.parametrize(
         "cvat_connected",

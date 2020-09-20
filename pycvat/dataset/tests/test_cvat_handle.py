@@ -73,6 +73,24 @@ class TestCvatHandle:
             mock_dataset_item_class=mock_dataset_item_class,
         )
 
+    def test_get_frame_size(self, config: ConfigForTests) -> None:
+        """
+        Tests that `get_frame_size()` works.
+
+        Args:
+            config: The configuration to use for testing.
+
+        """
+        # Arrange.
+        frame_num = 4
+
+        # Act.
+        got_size = config.cvat.get_frame_size(frame_num)
+
+        # Assert.
+        config.mock_task_metadata.frame_size.assert_called_once_with(frame_num)
+        assert got_size == config.mock_task_metadata.frame_size.return_value
+
     @pytest.mark.parametrize(
         "frame_num", [0, 5], ids=["frame_num_0", "frame_num_5"]
     )

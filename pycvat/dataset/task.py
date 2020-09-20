@@ -167,7 +167,8 @@ class Task:
         finally:
             # Delete the downloaded image.
             logger.debug("Deleting downloaded frame {}.", image_path)
-            if image_path.exists():
+            if image_path.exists():  # pragma: no cover
+                # This case is really hard to test, so we don't.
                 image_path.unlink()
 
     @contextmanager

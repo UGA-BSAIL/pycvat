@@ -33,6 +33,7 @@ class TestTask:
             mock_cli: The mocked `CLI` object to use.
             mock_load_image: The mocked `load_image()` function.
             mock_fromfile: The mocked `numpy.fromfile()` function.
+
             mock_make_archive: The mocked `shutil.make_archive()` function.
             project_dir: The fake project directory that we used to create
                 the task.

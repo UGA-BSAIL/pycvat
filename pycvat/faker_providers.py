@@ -4,7 +4,7 @@ Custom `Faker` providers that we use for testing.
 
 
 import unittest.mock as mock
-from typing import Any, List, Tuple
+from typing import Any, Dict, List, Tuple
 
 from datumaro.components.extractor import DatasetItem, Points
 from datumaro.util.image import Image
@@ -144,3 +144,44 @@ class CvatProvider(BaseProvider):
             item.has_image = True
 
         return item
+
+    def task_metadata(self, min_num_frames: int = 0) -> Dict[str, Any]:
+        """
+        Creates a fake task metadata dictionary that looks like it could have
+        plausibly come from the CVAT server.
+
+        Args:
+            The minimum number of frames that we allow metadata to be
+            produced for.
+
+        Returns:
+            The metadata dictionary that it created.
+
+        """
+        # Create the frame metadata.
+        frame_width = self.random_int(min=128, max=4096)
+        frame_height = self.random_int(min=128, max=4096)
+        frame_meta = []
+        for _ in range(self.random_int(min=min_num_frames, max=1000)):
+            frame_meta.append(
+                dict(
+                    width=frame_width,
+                    height=frame_height,
+                    name=self.__faker.file_path(category="image"),
+                )
+            )
+
+        # Generate start and end frames for the task.
+        start_frame = self.random_int()
+        end_frame = start_frame + len(frame_meta)
+
+        # Create the full metadata structure.
+        return dict(
+            chunk_size=self.random_int(min=1, max=10),
+            size=len(frame_meta),
+            image_quality=self.random_int(min=1, max=100),
+            start_frame=start_frame,
+            stop_frame=end_frame,
+            frame_filter="",
+            frames=frame_meta,
+        )
