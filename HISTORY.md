@@ -13,3 +13,8 @@
 ### v0.3.0 (2020-09-09)
 
 - Add support for Kedro datasets.
+
+### v0.3.1 (2020-09-20)
+
+- Add support for getting the frame size.
+- Get coverage to 100%.
