@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pycvat"
-version = "0.3.1"
+version = "0.3.2"
 description = "High-level Python API and utilities for CVAT."
 authors = ["Daniel Petti <djpetti@gmail.com>"]
 license = "MIT"
@@ -17,7 +17,7 @@ opencv-python = "^4.4.0"
 opencv-contrib-python = "^4.4.0"
 pydantic = "^1.6.1"
 kedro = "^0.16.4"
-cached-property = "^1.5.1"
+"backports.cached-property" = "^1.0.0"
 
 [tool.poetry.dev-dependencies]
 black = "^19.10b0"

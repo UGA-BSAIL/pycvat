@@ -18,3 +18,7 @@
 
 - Add support for getting the frame size.
 - Get coverage to 100%.
+
+### v0.3.2 (2020-10-16)
+
+- Switch to backported version of Py 3.8 cached_property

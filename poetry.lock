@@ -61,6 +61,14 @@ tests_no_zope = ["coverage (>=5.0.2)", "hypothesis", "pympler", "pytest (>=4.3.0
 
 [[package]]
 category = "main"
+description = "cached_property() - computed once per instance, cached as attribute"
+name = "backports.cached-property"
+optional = false
+python-versions = ">=3.6.0"
+version = "1.0.0.post2"
+
+[[package]]
+category = "main"
 description = "Ultra-lightweight pure Python package to check if a file is binary or text."
 name = "binaryornot"
 optional = false
@@ -89,14 +97,6 @@ typed-ast = ">=1.4.0"
 
 [package.extras]
 d = ["aiohttp (>=3.3.2)", "aiohttp-cors"]
-
-[[package]]
-category = "main"
-description = "A decorator for caching properties in classes."
-name = "cached-property"
-optional = false
-python-versions = "*"
-version = "1.5.1"
 
 [[package]]
 category = "main"
@@ -225,6 +225,7 @@ tf-gpu = ["tensorflow-gpu"]
 reference = "8d85909719ea1098474cbd4229f3c81b8c4e71f3"
 type = "git"
 url = "https://github.com/openvinotoolkit/datumaro"
+
 [[package]]
 category = "main"
 description = "Decorators for Humans"
@@ -1228,7 +1229,7 @@ docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
 testing = ["jaraco.itertools", "func-timeout"]
 
 [metadata]
-content-hash = "a5ea628af5bb084d65d308a49a1f2ed9edc253557dd9fc0b6f63b47baa983d84"
+content-hash = "c69d3068ee68a119012adcf7446badab1f6364be29aeae1cb0d19950dd34a22f"
 lock-version = "1.0"
 python-versions = "~3.7"
 
@@ -1253,6 +1254,10 @@ attrs = [
     {file = "attrs-20.2.0-py2.py3-none-any.whl", hash = "sha256:fce7fc47dfc976152e82d53ff92fa0407700c21acd20886a13777a0d20e655dc"},
     {file = "attrs-20.2.0.tar.gz", hash = "sha256:26b54ddbbb9ee1d34d5d3668dd37d6cf74990ab23c828c2888dccdceee395594"},
 ]
+"backports.cached-property" = [
+    {file = "backports.cached-property-1.0.0.post2.tar.gz", hash = "sha256:74d525451ff39a069701ed81247e708498a387eeb35043070d008e1c25ed1b0c"},
+    {file = "backports.cached_property-1.0.0.post2-py3-none-any.whl", hash = "sha256:268eb9a5c6bb74d567038d574d7c2abfdadb481522ed8c5f230c13a898472673"},
+]
 binaryornot = [
     {file = "binaryornot-0.4.4-py2.py3-none-any.whl", hash = "sha256:b8b71173c917bddcd2c16070412e369c3ed7f0528926f70cac18a6c97fd563e4"},
     {file = "binaryornot-0.4.4.tar.gz", hash = "sha256:359501dfc9d40632edc9fac890e19542db1a287bbcfa58175b66658392018061"},
@@ -1260,10 +1265,6 @@ binaryornot = [
 black = [
     {file = "black-19.10b0-py36-none-any.whl", hash = "sha256:1b30e59be925fafc1ee4565e5e08abef6b03fe455102883820fe5ee2e4734e0b"},
     {file = "black-19.10b0.tar.gz", hash = "sha256:c2edb73a08e9e0e6f65a0e6af18b059b8b1cdd5bef997d7a0b181df93dc81539"},
-]
-cached-property = [
-    {file = "cached-property-1.5.1.tar.gz", hash = "sha256:9217a59f14a5682da7c4b8829deadbfc194ac22e9908ccf7c8820234e80a1504"},
-    {file = "cached_property-1.5.1-py2.py3-none-any.whl", hash = "sha256:3a026f1a54135677e7da5ce819b0c690f156f37976f3e30c5430740725203d7f"},
 ]
 cachetools = [
     {file = "cachetools-4.1.1-py3-none-any.whl", hash = "sha256:513d4ff98dd27f85743a8dc0e92f55ddb1b49e060c2d5961512855cda2c01a98"},

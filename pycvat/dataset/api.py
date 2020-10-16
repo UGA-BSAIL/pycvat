@@ -7,7 +7,7 @@ from contextlib import contextmanager
 from typing import Any, Tuple
 
 import requests
-from cached_property import cached_property
+from backports.cached_property import cached_property
 from loguru import logger
 
 from cvat.utils.cli.core.core import CVAT_API_V1

@@ -6,7 +6,7 @@ A Kedro `DataSet` for data from CVAT.
 from contextlib import ExitStack
 from typing import Any, Dict, Tuple
 
-from cached_property import cached_property
+from backports.cached_property import cached_property
 from kedro.io import AbstractDataSet
 from loguru import logger
 

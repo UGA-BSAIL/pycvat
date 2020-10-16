@@ -6,7 +6,7 @@ Parses metadata for a task.
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
-from cached_property import cached_property
+from backports.cached_property import cached_property
 from loguru import logger
 
 from .api import Authenticator

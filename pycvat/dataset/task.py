@@ -11,7 +11,7 @@ from typing import ContextManager
 from zipfile import ZipFile
 
 import numpy as np
-from cached_property import cached_property
+from backports.cached_property import cached_property
 from datumaro.components.project import Project, ProjectDataset
 from datumaro.plugins.cvat_format.converter import CvatConverter
 from datumaro.util.image import load_image

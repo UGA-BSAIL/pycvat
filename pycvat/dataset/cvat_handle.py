@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Tuple
 
 import numpy as np
-from cached_property import cached_property
+from backports.cached_property import cached_property
 from datumaro.components.extractor import DatasetItem
 from loguru import logger
 
