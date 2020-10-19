@@ -7,6 +7,7 @@ import unittest.mock as mock
 from pathlib import Path
 
 import pytest
+import requests
 from faker import Faker
 from pydantic.dataclasses import dataclass
 from pytest_mock import MockFixture
@@ -14,6 +15,7 @@ from pytest_mock import MockFixture
 from cvat.utils.cli.core.core import CLI
 from pycvat.dataset import task
 from pycvat.dataset.api import Authenticator
+from pycvat.dataset.labels import Label
 from pycvat.type_helpers import ArbitraryTypesConfig
 
 
@@ -255,3 +257,81 @@ class TestTask:
         mock_zipfile_class.assert_called_once()
         mock_zipfile = mock_zipfile_class.return_value.__enter__.return_value
         mock_zipfile.extractall.assert_called_once()
+
+    def test_create_new(
+        self, config: ConfigForTests, mocker: MockFixture, faker: Faker
+    ) -> None:
+        """
+        Tests that `create_new` works.
+
+        Args:
+            config: The configuration to use for testing.
+            mocker: The fixture to use for mocking.
+            faker: The fixture to use for generating fake data.
+
+        """
+        # Arrange.
+        # Mock the dependencies.
+        mock_cli_class = mocker.patch(task.__name__ + ".CLI")
+        mocker.patch(task.__name__ + ".ZipFile")
+        mock_labels_to_cvat_spec = mocker.patch(
+            task.__name__ + ".labels_to_cvat_spec"
+        )
+        mock_auth = mocker.create_autospec(Authenticator, instance=True)
+        # Make sure we can use the post method on the session.
+        mock_auth.session = mocker.create_autospec(
+            requests.Session, instance=True
+        )
+
+        # Make it look like it produces a valid response.
+        mock_auth.session.post.return_value.json.return_value = {
+            "id": config.task_id
+        }
+
+        # Mock some labels.
+        mock_labels = [
+            mocker.create_autospec(Label, instance=True),
+            mocker.create_autospec(Label, instance=True),
+        ]
+
+        # Create a fake name and bug tracker URL.
+        fake_name = faker.text(max_nb_chars=100)
+        fake_bug_tracker = faker.url()
+
+        # Create fake images.
+        images = []
+        for _ in range(10):
+            images.append(Path(faker.file_path(category="image")))
+
+        # Act.
+        with task.Task.create_new(
+            auth=mock_auth,
+            name=fake_name,
+            labels=mock_labels,
+            bug_tracker=fake_bug_tracker,
+            images=images,
+        ):
+            pass
+
+        # Assert.
+        # It should have created the task on the server.
+        mock_labels_to_cvat_spec.assert_called_once_with(mock_labels)
+        mock_auth.session.post.assert_called_once_with(
+            mock_auth.api.tasks,
+            json={
+                "name": fake_name,
+                "labels": mock_labels_to_cvat_spec.return_value,
+                "bug_tracker": fake_bug_tracker,
+            },
+        )
+
+        # It should have added the images.
+        mock_cli = mock_cli_class.return_value
+        mock_cli.tasks_data.assert_called_once_with(
+            config.task_id, mocker.ANY, images
+        )
+
+        # It should have downloaded the data.
+        mock_cli.tasks_dump.assert_called_once_with(
+            config.task_id, mocker.ANY, mocker.ANY
+        )

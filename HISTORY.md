@@ -22,3 +22,7 @@
 ### v0.3.2 (2020-10-16)
 
 - Switch to backported version of Py 3.8 cached_property
+
+### v0.4.0 (2020-10-19)
+
+- Add support for creating new tasks.

@@ -7,7 +7,7 @@ import shutil
 import tempfile
 from contextlib import ExitStack, contextmanager
 from pathlib import Path
-from typing import ContextManager
+from typing import ContextManager, Iterable, List
 from zipfile import ZipFile
 
 import numpy as np
@@ -19,8 +19,10 @@ from loguru import logger
 from methodtools import lru_cache
 
 from cvat.utils.cli.core.core import CLI
+from cvat.utils.cli.core.definition import ResourceType
 
 from .api import Authenticator
+from .labels import Label, labels_to_cvat_spec
 
 
 class Task:
@@ -99,6 +101,53 @@ class Task:
             )
 
             yield cls(project_dir=project_dir, cvat_cli=cli, task_id=task_id)
+
+    @classmethod
+    @contextmanager
+    def create_new(
+        cls,
+        *,
+        auth: Authenticator,
+        name: str,
+        labels: Iterable[Label],
+        bug_tracker: str = "",
+        images: List[Path] = [],
+    ) -> ContextManager["Task"]:
+        """
+        Creates a brand new task and uploads it to the server.
+
+        Args:
+            auth: Object that we use for authenticating with the API.
+            name: The name of the new task.
+            labels: The annotation labels that should be used for the new task.
+            bug_tracker: Specify the URL of a bug tracker for the new task.
+            images: A list of the paths to the images to annotate for this task.
+
+        Returns:
+            The task that it created.
+
+        """
+        # Create the task on the server.
+        data = {
+            "name": name,
+            "labels": labels_to_cvat_spec(labels),
+            "bug_tracker": bug_tracker,
+        }
+        response = auth.session.post(auth.api.tasks, json=data)
+        response.raise_for_status()
+        response_json = response.json()
+        task_id = response_json["id"]
+
+        logger.info("Created task '{}' with ID {}.", name, id)
+
+        # Upload the images.
+        logger.info("Uploading task images...")
+        cli = CLI(auth.session, auth.api, auth.credentials,)
+        cli.tasks_data(task_id, ResourceType.LOCAL, images)
+
+        # Download the created task data locally.
+        with cls.download(task_id=task_id, auth=auth) as task:
+            yield task
 
     def __init__(self, *, project_dir: Path, cvat_cli: CLI, task_id: int):
         """
