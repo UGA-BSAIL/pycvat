@@ -3,6 +3,7 @@ Tests for the `cvat_data_set` module.
 """
 
 import unittest.mock as mock
+from typing import Any, Dict
 
 import pytest
 from faker import Faker
@@ -26,22 +27,19 @@ class TestCvatDataSet:
 
         Attributes:
             data_set: The `CvatDataSet` object under test.
-            mock_auth_class: The mocked `Authenticator` class.
             mock_cvat_handle_class: The mocked `CvatHandle` class.
+            mock_auth_data_set_class: The mocked `CvatAuthDataSet` class.
+
             task_id: The task ID to use for testing.
-            user: The username to use for testing.
-            password: The password to use for testing.
-            host: The CVAT server address to use for testing.
+            auth_kwargs: The keyword arguments passed to the `CvatAuthDataSet`.
         """
 
         data_set: cvat_data_set.CvatDataSet
-        mock_auth_class: mock.Mock
         mock_cvat_handle_class: mock.Mock
+        mock_auth_data_set_class: mock.Mock
 
         task_id: int
-        user: str
-        password: str
-        host: str
+        auth_kwargs: Dict[str, Any]
 
     @classmethod
     @pytest.fixture
@@ -58,31 +56,24 @@ class TestCvatDataSet:
 
         """
         # Mock the dependencies.
-        mock_auth_class = mocker.patch(
-            cvat_data_set.__name__ + ".Authenticator"
+        mock_auth_data_set_class = mocker.patch(
+            cvat_data_set.__name__ + ".CvatAuthDataSet"
         )
         mock_cvat_handle_class = mocker.patch(
             cvat_data_set.__name__ + ".CvatHandle"
         )
 
         task_id = faker.random_int()
-        user = faker.profile(["username"])["username"]
-        password = faker.pystr()
-        host = faker.hostname()
-        credentials = dict(username=user, password=password)
+        auth_kwargs = faker.pydict()
 
-        data_set = cvat_data_set.CvatDataSet(
-            task_id=task_id, credentials=credentials, host=host
-        )
+        data_set = cvat_data_set.CvatDataSet(task_id=task_id, **auth_kwargs)
 
         yield cls.ConfigForTests(
             data_set=data_set,
-            mock_auth_class=mock_auth_class,
+            mock_auth_data_set_class=mock_auth_data_set_class,
             mock_cvat_handle_class=mock_cvat_handle_class,
             task_id=task_id,
-            user=user,
-            password=password,
-            host=host,
+            auth_kwargs=auth_kwargs,
         )
 
         # Manually call the destructor before the mocks exit scope, since it
@@ -113,13 +104,12 @@ class TestCvatDataSet:
         # Act.
         config.data_set.__del__()
 
+        # Assert.
         if cvat_connected:
             # It should have exited the context that it created.
-            config.mock_auth_class.from_new_session.return_value.__exit__.assert_called_once()
             config.mock_cvat_handle_class.for_task.return_value.__exit__.assert_called_once()
         else:
             # It should not have touched the CVAT stuff.
-            config.mock_auth_class.from_new_session.return_value.__exit__.assert_not_called()
             config.mock_cvat_handle_class.for_task.return_value.__exit__.assert_not_called()
 
     def test_load(self, config: ConfigForTests) -> None:
@@ -135,11 +125,11 @@ class TestCvatDataSet:
 
         # Assert.
         # It should have set up the CvatHandle.
-        config.mock_auth_class.from_new_session.assert_called_once_with(
-            user=config.user, password=config.password, host=config.host
+        config.mock_auth_data_set_class.assert_called_once_with(
+            **config.auth_kwargs
         )
         mock_auth = (
-            config.mock_auth_class.from_new_session.return_value.__enter__.return_value
+            config.mock_auth_data_set_class.return_value.load.return_value
         )
 
         config.mock_cvat_handle_class.for_task.assert_called_once_with(
@@ -147,7 +137,6 @@ class TestCvatDataSet:
         )
 
         # It should not have exited the context.
-        config.mock_auth_class.from_new_session.return_value.__exit__.assert_not_called()
         config.mock_cvat_handle_class.for_task.return_value.__exit__.assert_not_called()
 
         # It should have just given us the CVAT handle.

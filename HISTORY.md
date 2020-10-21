@@ -31,3 +31,7 @@
 
 - Add support for label annotations.
 - Better API for new task creation.
+
+### v0.6.0 (2020-10-21)
+
+- Add support for a separate authentication dataset.

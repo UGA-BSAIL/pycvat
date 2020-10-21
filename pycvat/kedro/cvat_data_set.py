@@ -10,7 +10,8 @@ from backports.cached_property import cached_property
 from kedro.io import AbstractDataSet
 from loguru import logger
 
-from ..dataset import Authenticator, CvatHandle
+from ..dataset import CvatHandle
+from .cvat_auth_data_set import CvatAuthDataSet
 
 
 class CvatDataSet(AbstractDataSet):
@@ -18,33 +19,14 @@ class CvatDataSet(AbstractDataSet):
     A Kedro `DataSet` for data from CVAT.
     """
 
-    def __init__(
-        self,
-        *,
-        task_id: int,
-        credentials: Dict[str, str],
-        host: str = "localhost:8080"
-    ):
+    def __init__(self, *, task_id: int, **kwargs: Any):
         """
         Args:
             task_id: The numerical ID of the task to load data from.
-            credentials: Credentials to use for logging into CVAT. Should
-                contain two keys: "username", which is the name of the user
-                to log in as, and "password", which is the password for that
-                user.
-            host: The address of the CVAT server to connect to.
+            **kwargs: Will be forwarded to `CvatAuthDataSet`.
         """
-        assert (
-            "username" in credentials
-        ), "'username' must be specified in CVAT credentials."
-        assert (
-            "password" in credentials
-        ), "'password' must be specified in CVAT credentials."
-
         self.__task_id = task_id
-        self.__user = credentials["username"]
-        self.__password = credentials["password"]
-        self.__host = host
+        self.__auth = CvatAuthDataSet(**kwargs)
 
         # CVAT data is lazy-loaded, so this specifies whether the connection
         # was ever opened.
@@ -65,23 +47,16 @@ class CvatDataSet(AbstractDataSet):
 
         """
         logger.info(
-            "Initializing connection to task {} at {}.",
-            self.__task_id,
-            self.__host,
+            "Initializing connection to task {}.", self.__task_id,
         )
 
         self.__connected_to_cvat = True
 
         with ExitStack() as exit_stack:
-            auth = exit_stack.enter_context(
-                Authenticator.from_new_session(
-                    user=self.__user,
-                    password=self.__password,
-                    host=self.__host,
-                )
-            )
             handle = exit_stack.enter_context(
-                CvatHandle.for_task(task_id=self.__task_id, auth=auth)
+                CvatHandle.for_task(
+                    task_id=self.__task_id, auth=self.__auth.load()
+                )
             )
 
             context = exit_stack.pop_all()
@@ -127,4 +102,4 @@ class CvatDataSet(AbstractDataSet):
 
     # Not tested, because Kedro doesn't provide a public API for this.
     def _describe(self) -> Dict[str, Any]:  # pragma: no cover
-        return dict(task_id=self.__task_id, user=self.__user, host=self.__host)
+        return dict(task_id=self.__task_id, auth=repr(self.__auth))
