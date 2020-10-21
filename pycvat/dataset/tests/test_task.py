@@ -9,14 +9,14 @@ from pathlib import Path
 import pytest
 import requests
 from faker import Faker
+from pycvat.dataset import task
+from pycvat.dataset.api import Authenticator
+from pycvat.dataset.labels import LabelSet
+from pycvat.type_helpers import ArbitraryTypesConfig
 from pydantic.dataclasses import dataclass
 from pytest_mock import MockFixture
 
 from cvat.utils.cli.core.core import CLI
-from pycvat.dataset import task
-from pycvat.dataset.api import Authenticator
-from pycvat.dataset.labels import Label
-from pycvat.type_helpers import ArbitraryTypesConfig
 
 
 class TestTask:
@@ -35,8 +35,8 @@ class TestTask:
             mock_cli: The mocked `CLI` object to use.
             mock_load_image: The mocked `load_image()` function.
             mock_fromfile: The mocked `numpy.fromfile()` function.
-
             mock_make_archive: The mocked `shutil.make_archive()` function.
+
             project_dir: The fake project directory that we used to create
                 the task.
             task_id: The fake task ID that we used to create the task.
@@ -222,6 +222,17 @@ class TestTask:
             config.task_id, mock.ANY, mock.ANY
         )
 
+    def test_id(self, config: ConfigForTests) -> None:
+        """
+        Tests that the `id` property works.
+
+        Args:
+            config: The configuration to use for testing.
+
+        """
+        # Act and assert.
+        assert config.task.id == config.task_id
+
     def test_download(
         self, config: ConfigForTests, mocker: MockFixture
     ) -> None:
@@ -274,9 +285,6 @@ class TestTask:
         # Mock the dependencies.
         mock_cli_class = mocker.patch(task.__name__ + ".CLI")
         mocker.patch(task.__name__ + ".ZipFile")
-        mock_labels_to_cvat_spec = mocker.patch(
-            task.__name__ + ".labels_to_cvat_spec"
-        )
         mock_auth = mocker.create_autospec(Authenticator, instance=True)
         # Make sure we can use the post method on the session.
         mock_auth.session = mocker.create_autospec(
@@ -289,10 +297,7 @@ class TestTask:
         }
 
         # Mock some labels.
-        mock_labels = [
-            mocker.create_autospec(Label, instance=True),
-            mocker.create_autospec(Label, instance=True),
-        ]
+        mock_labels = mocker.create_autospec(LabelSet, instance=True)
 
         # Create a fake name and bug tracker URL.
         fake_name = faker.text(max_nb_chars=100)
@@ -315,12 +320,12 @@ class TestTask:
 
         # Assert.
         # It should have created the task on the server.
-        mock_labels_to_cvat_spec.assert_called_once_with(mock_labels)
+        mock_labels.to_cvat_spec.assert_called_once_with()
         mock_auth.session.post.assert_called_once_with(
             mock_auth.api.tasks,
             json={
                 "name": fake_name,
-                "labels": mock_labels_to_cvat_spec.return_value,
+                "labels": mock_labels.to_cvat_spec.return_value,
                 "bug_tracker": fake_bug_tracker,
             },
         )

@@ -8,14 +8,13 @@ from pathlib import Path
 
 import pytest
 from faker import Faker
-from pydantic.dataclasses import dataclass
-from pytest_mock import MockFixture
-
 from pycvat.dataset import cvat_handle
 from pycvat.dataset.api import Authenticator
 from pycvat.dataset.task import Task
 from pycvat.dataset.task_metadata import TaskMetadata
 from pycvat.type_helpers import ArbitraryTypesConfig
+from pydantic.dataclasses import dataclass
+from pytest_mock import MockFixture
 
 
 class TestCvatHandle:
@@ -219,6 +218,44 @@ class TestCvatHandle:
         mock_task = (
             mock_task_class.download.return_value.__enter__.return_value
         )
+        mock_task.upload.assert_called_once_with()
+
+    def test_for_new_task(self, mocker: MockFixture) -> None:
+        """
+        Tests that `for_new_task` works.
+
+        Args:
+            mocker: The fixture to use for mocking.
+
+        """
+        # Arrange.
+        task_kwargs = {"foo": 42, "bar": None}
+
+        # Mock the dependencies.
+        mock_auth = mocker.create_autospec(Authenticator, instance=True)
+        mock_metadata_class = mocker.patch(
+            cvat_handle.__name__ + ".TaskMetadata"
+        )
+        mock_task_class = mocker.patch(cvat_handle.__name__ + ".Task")
+
+        # Act.
+        with cvat_handle.CvatHandle.for_new_task(
+            auth=mock_auth, **task_kwargs
+        ):
+            # Assert.
+            # It should have created the task.
+            mock_task_class.create_new.assert_called_once_with(
+                auth=mock_auth, **task_kwargs
+            )
+            mock_task = (
+                mock_task_class.create_new.return_value.__enter__.return_value
+            )
+
+            mock_metadata_class.asert_called_once_with(
+                task_id=mock_task.id, auth=mock_auth
+            )
+
+        # Upon exit, it should have uploaded the task.
         mock_task.upload.assert_called_once_with()
 
     def test_upload_now(self, config: ConfigForTests) -> None:

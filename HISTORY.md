@@ -26,3 +26,8 @@
 ### v0.4.0 (2020-10-19)
 
 - Add support for creating new tasks.
+
+### v0.5.0 (2020-10-21)
+
+- Add support for label annotations.
+- Better API for new task creation.

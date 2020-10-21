@@ -12,17 +12,17 @@ from zipfile import ZipFile
 
 import numpy as np
 from backports.cached_property import cached_property
-from datumaro.components.project import Project, ProjectDataset
-from datumaro.plugins.cvat_format.converter import CvatConverter
-from datumaro.util.image import load_image
 from loguru import logger
 from methodtools import lru_cache
 
 from cvat.utils.cli.core.core import CLI
 from cvat.utils.cli.core.definition import ResourceType
+from datumaro.components.project import Project, ProjectDataset
+from datumaro.plugins.cvat_format.converter import CvatConverter
+from datumaro.util.image import load_image
 
 from .api import Authenticator
-from .labels import Label, labels_to_cvat_spec
+from .labels import LabelSet
 
 
 class Task:
@@ -109,7 +109,7 @@ class Task:
         *,
         auth: Authenticator,
         name: str,
-        labels: Iterable[Label],
+        labels: LabelSet,
         bug_tracker: str = "",
         images: List[Path] = [],
     ) -> ContextManager["Task"]:
@@ -130,7 +130,7 @@ class Task:
         # Create the task on the server.
         data = {
             "name": name,
-            "labels": labels_to_cvat_spec(labels),
+            "labels": labels.to_cvat_spec(),
             "bug_tracker": bug_tracker,
         }
         response = auth.session.post(auth.api.tasks, json=data)
@@ -301,3 +301,11 @@ class Task:
             )
 
         logger.info("Project uploaded.")
+
+    @property
+    def id(self) -> int:
+        """
+        Returns:
+            The ID for the task.
+        """
+        return self.__task_id

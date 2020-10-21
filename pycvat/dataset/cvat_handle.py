@@ -9,8 +9,9 @@ from typing import Any, Dict, Iterable, List, Tuple
 
 import numpy as np
 from backports.cached_property import cached_property
-from datumaro.components.extractor import DatasetItem
 from loguru import logger
+
+from datumaro.components.extractor import DatasetItem
 
 from .api import Authenticator
 from .task import Task
@@ -42,7 +43,31 @@ class CvatHandle:
         with Task.download(task_id=task_id, auth=auth) as task:
             yield cls(task=task, task_meta=metadata)
 
-            # Upload the modified project.
+            # Upload the modified task.
+            task.upload()
+
+    @classmethod
+    @contextmanager
+    def for_new_task(
+        cls, *, auth: Authenticator, **kwargs: Any
+    ) -> "CvatHandle":
+        """
+        Creates a new task and then makes a handle for it.
+
+        Args:
+            auth: The object to use for authentication with CVAT.
+            **kwargs: Will be forwarded to `Task.create_new()`.
+
+        Returns:
+            The `CvatHandle` object that it created.
+
+        """
+        with Task.create_new(auth=auth, **kwargs) as task:
+            metadata = TaskMetadata(task_id=task.id, auth=auth)
+
+            yield cls(task=task, task_meta=metadata)
+
+            # Upload the modified task.
             task.upload()
 
     def __init__(self, *, task: Task, task_meta: TaskMetadata):
