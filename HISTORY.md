@@ -35,3 +35,7 @@
 ### v0.6.0 (2020-10-21)
 
 - Add support for a separate authentication dataset.
+
+### v0.6.1 (2020-10-21)
+
+- Fix a missing import alias.
