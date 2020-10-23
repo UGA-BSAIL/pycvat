@@ -10,8 +10,8 @@ from backports.cached_property import cached_property
 from kedro.io import AbstractDataSet
 from loguru import logger
 
-from ..dataset import CvatHandle
-from .cvat_auth_data_set import CvatAuthDataSet
+from ..dataset.api import make_api_client
+from ..dataset.task import Task
 
 
 class CvatDataSet(AbstractDataSet):
@@ -19,26 +19,49 @@ class CvatDataSet(AbstractDataSet):
     A Kedro `DataSet` for data from CVAT.
     """
 
-    def __init__(self, *, task_id: int, **kwargs: Any):
+    def __init__(
+        self,
+        *,
+        task_id: int,
+        credentials: Dict[str, str],
+        host: str = "localhost:8080"
+    ):
         """
         Args:
             task_id: The numerical ID of the task to load data from.
-            **kwargs: Will be forwarded to `CvatAuthDataSet`.
+            credentials: Credentials to use for logging into CVAT. Should
+                contain two keys: "username", which is the name of the user
+                to log in as, and "password", which is the password for that
+                user.
+            host: The address of the CVAT server to connect to.
         """
+        assert (
+            "username" in credentials
+        ), "'username' must be specified in CVAT credentials."
+        assert (
+            "password" in credentials
+        ), "'password' must be specified in CVAT credentials."
+
+        username = credentials["username"]
+        password = credentials["password"]
+        host = host
+        self.__api = make_api_client(
+            user=username, password=password, host=host
+        )
+
         self.__task_id = task_id
-        self.__auth = CvatAuthDataSet(**kwargs)
 
         # CVAT data is lazy-loaded, so this specifies whether the connection
         # was ever opened.
         self.__connected_to_cvat = False
 
     @cached_property
-    def __init_cvat_handle(self) -> Tuple[CvatHandle, ExitStack]:
+    def __init_cvat_handle(self) -> Tuple[Task, ExitStack]:
         """
         Initializes the CVAT handle that will be used to access this data.
 
         Returns:
-            A handle object that can be used to access CVAT.
+            A handle object that can be used to access the CVAT task.
 
             Also, an `ExitStack` object that encapsulates callbacks for
             cleaning up the CVAT handle context. The `close()` method should
@@ -54,8 +77,8 @@ class CvatDataSet(AbstractDataSet):
 
         with ExitStack() as exit_stack:
             handle = exit_stack.enter_context(
-                CvatHandle.for_task(
-                    task_id=self.__task_id, auth=self.__auth.load()
+                Task.init_and_upload(
+                    task_id=self.__task_id, api_client=self.__api
                 )
             )
 
@@ -63,20 +86,21 @@ class CvatDataSet(AbstractDataSet):
             return handle, context
 
     @property
-    def __cvat(self) -> CvatHandle:
+    def __cvat_task(self) -> Task:
         """
         Returns:
-            The CVAT handle to use. Will be created if it doesn't already exist.
+            The CVAT task handle to use. Will be created if it doesn't already
+            exist.
         """
-        cvat, _ = self.__init_cvat_handle
-        return cvat
+        task, _ = self.__init_cvat_handle
+        return task
 
     @property
     def __cvat_context(self) -> ExitStack:
         """
         Returns:
             The `ExitStack` object that encapsulates callbacks for safely
-            cleaning up the CVAT handle.
+            cleaning up the CVAT task handle.
         """
         _, context = self.__init_cvat_handle
         return context
@@ -88,12 +112,12 @@ class CvatDataSet(AbstractDataSet):
             self.__cvat_context.close()
             self.__connected_to_cvat = False
 
-    def _load(self) -> CvatHandle:
-        return self.__cvat
+    def _load(self) -> Task:
+        return self.__cvat_task
 
-    def _save(self, data: CvatHandle) -> None:
+    def _save(self, data: Task) -> None:
         # Force the data to be uploaded now.
-        data.upload_now()
+        data.upload()
 
     def _exists(self) -> bool:
         # This is always true, because this class only works with data that
@@ -102,4 +126,4 @@ class CvatDataSet(AbstractDataSet):
 
     # Not tested, because Kedro doesn't provide a public API for this.
     def _describe(self) -> Dict[str, Any]:  # pragma: no cover
-        return dict(task_id=self.__task_id, auth=repr(self.__auth))
+        return dict(task_id=self.__task_id, host=self.__api.configuration.host)

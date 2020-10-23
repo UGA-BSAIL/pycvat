@@ -9,9 +9,14 @@ from typing import Any, Dict, Iterable, List, Tuple
 
 import numpy as np
 from backports.cached_property import cached_property
-from loguru import logger
-
 from datumaro.components.extractor import DatasetItem
+from loguru import logger
+from tenacity import (
+    retry,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_exponential,
+)
 
 from .api import Authenticator
 from .task import Task
@@ -47,23 +52,48 @@ class CvatHandle:
             task.upload()
 
     @classmethod
+    @retry(
+        stop=stop_after_attempt(10),
+        wait=wait_exponential(multiplier=1, min=1, max=10),
+        retry=retry_if_exception_type(IOError),
+    )
+    def __verify_metadata(
+        cls, task_id: int, auth: Authenticator, num_frames: int
+    ) -> TaskMetadata:
+        metadata = TaskMetadata(task_id=task_id, auth=auth)
+
+        if metadata.num_frames != num_frames:
+            # Sometimes it takes a little while for CVAT to fully process
+            # the frames.
+            logger.debug(
+                "Uploaded {} frames, but have metadata for {}.",
+                num_frames,
+                metadata.num_frames,
+            )
+            raise IOError("CVAT not reporting correct frame number.")
+
+        return metadata
+
+    @classmethod
     @contextmanager
     def for_new_task(
-        cls, *, auth: Authenticator, **kwargs: Any
+        cls, *, auth: Authenticator, images: List[Path] = [], **kwargs: Any
     ) -> "CvatHandle":
         """
         Creates a new task and then makes a handle for it.
 
         Args:
             auth: The object to use for authentication with CVAT.
+            images: The list of paths to the images that we want to include
+                with this task.
             **kwargs: Will be forwarded to `Task.create_new()`.
 
         Returns:
             The `CvatHandle` object that it created.
 
         """
-        with Task.create_new(auth=auth, **kwargs) as task:
-            metadata = TaskMetadata(task_id=task.id, auth=auth)
+        with Task.create_new(auth=auth, images=images, **kwargs) as task:
+            metadata = cls.__verify_metadata(task.id, auth, len(images))
 
             yield cls(task=task, task_meta=metadata)
 

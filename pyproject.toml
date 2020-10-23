@@ -18,6 +18,9 @@ opencv-contrib-python = "^4.4.0"
 pydantic = "^1.6.1"
 kedro = "^0.16.4"
 "backports.cached-property" = "^1.0.0"
+tenacity = "^6.2.0"
+cvat-api = {path = "cvat_api", develop = false}
+singledispatchmethod = "^1.0"
 
 [tool.poetry.dev-dependencies]
 black = "^19.10b0"
@@ -43,6 +46,7 @@ exclude = '''
     | build
     | dist
     | cvat
+    | cvat_api
   )/
 )
 '''
@@ -50,7 +54,7 @@ exclude = '''
 [tool.isort]
 profile = "black"
 line_length = 79
-skip = "('.eggs', '.git', '.venv', 'build', 'dist', 'cvat')"
+skip = "('.eggs', '.git', '.venv', 'build', 'dist', 'cvat', 'cvat_api')"
 
 [build-system]
 requires = ["poetry>=0.12"]

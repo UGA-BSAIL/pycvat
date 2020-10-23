@@ -3,121 +3,49 @@ Manages downloading and opening annotations from a CVAT task.
 """
 
 
-import shutil
-import tempfile
-from contextlib import ExitStack, contextmanager
 from pathlib import Path
-from typing import ContextManager, Iterable, List
-from zipfile import ZipFile
+from typing import Any, Iterable, List
 
+import cv2
 import numpy as np
-from backports.cached_property import cached_property
 from loguru import logger
 from methodtools import lru_cache
 
-from cvat.utils.cli.core.core import CLI
-from cvat.utils.cli.core.definition import ResourceType
-from datumaro.components.project import Project, ProjectDataset
-from datumaro.plugins.cvat_format.converter import CvatConverter
-from datumaro.util.image import load_image
+from cvat_api import ApiClient, ClientFile, Data, Label
+from cvat_api import Task as TaskModel
+from cvat_api import TasksApi
 
-from .api import Authenticator
-from .labels import LabelSet
+from .clearable_cached_property import ClearableCachedProperty
+from .cvat_connector import CvatConnector
+from .job import Job
+from .swagger_extensions import ExtendedTasksApi
 
 
-class Task:
+class Task(CvatConnector):
     """
     Manages downloading and opening annotations from a CVAT task.
     """
 
-    _DATUMARO_FORMAT = "Datumaro 1.0"
-    """
-    Format string to use for CVAT data dumps.
-    """
     _MAX_IMAGES_TO_CACHE = 256
     """
     Maximum number of downloaded images to cache in memory.
     """
 
     @classmethod
-    def __load_zip(
-        cls, *, zip_file: Path, extract_to: Path
-    ) -> ContextManager[Path]:
-        """
-        Loads task data from a downloaded Datumaro zip file.
-
-        Args:
-            zip_file: The zip file to load from.
-            extract_to: The directory to extract the zip file to.
-
-        Returns:
-            The path to the unzipped project directory.
-
-        """
-        # Datumaro zips pollute the current directory, so we create a
-        # sub-directory to contain the extracted data.
-        extracted_dir = extract_to / f"{zip_file.stem}_extracted"
-        extracted_dir.mkdir(exist_ok=True)
-
-        # Open the zip file.
-        logger.debug("Extracting {} to {}...", zip_file, extracted_dir)
-        with ZipFile(zip_file) as opened_zip:
-            opened_zip.extractall(path=extracted_dir)
-
-        return extracted_dir
-
-    @classmethod
-    @contextmanager
-    def download(
-        cls, *, task_id: int, auth: Authenticator
-    ) -> ContextManager["Task"]:
-        """
-        Automatically downloads a task from a CVAT server. It is meant to be
-        used as a context manager.
-
-        Args:
-            task_id: The ID of the task to download.
-            auth: Object that we use for authenticating with the API.
-
-        Returns:
-            The `Task` that it downloaded.
-
-        """
-        logger.info("Downloading data for task {}.", task_id)
-
-        with tempfile.TemporaryDirectory() as output_dir:
-            output_dir = Path(output_dir)
-            logger.debug(
-                "Using {} as temporary project directory.", output_dir
-            )
-
-            # Download the annotation data from the server.
-            cli = CLI(auth.session, auth.api, auth.credentials,)
-            output_zip_file = output_dir / f"dataset_{task_id}.zip"
-            cli.tasks_dump(task_id, cls._DATUMARO_FORMAT, output_zip_file)
-
-            project_dir = cls.__load_zip(
-                zip_file=output_zip_file, extract_to=output_dir
-            )
-
-            yield cls(project_dir=project_dir, cvat_cli=cli, task_id=task_id)
-
-    @classmethod
-    @contextmanager
     def create_new(
         cls,
         *,
-        auth: Authenticator,
+        api_client: ApiClient,
         name: str,
-        labels: LabelSet,
+        labels: Iterable[Label],
         bug_tracker: str = "",
         images: List[Path] = [],
-    ) -> ContextManager["Task"]:
+    ) -> "Task":
         """
         Creates a brand new task and uploads it to the server.
 
         Args:
-            auth: Object that we use for authenticating with the API.
+            api_client: The client to use for accessing the CVAT API.
             name: The name of the new task.
             labels: The annotation labels that should be used for the new task.
             bug_tracker: Specify the URL of a bug tracker for the new task.
@@ -128,134 +56,68 @@ class Task:
 
         """
         # Create the task on the server.
-        data = {
-            "name": name,
-            "labels": labels.to_cvat_spec(),
-            "bug_tracker": bug_tracker,
-        }
-        response = auth.session.post(auth.api.tasks, json=data)
-        response.raise_for_status()
-        response_json = response.json()
-        task_id = response_json["id"]
+        api = ExtendedTasksApi(api_client)
+        task_model = TaskModel(
+            name=name, labels=labels, bug_tracker=bug_tracker
+        )
+        task_model = api.tasks_create(task_model)
+        logger.info("Created new task with ID {}.", task_model.id)
 
-        logger.info("Created task '{}' with ID {}.", name, id)
+        # Add the images to the task.
+        logger.debug("Uploading task images...")
+        client_files = [ClientFile(file=i) for i in images]
+        task_data = Data(image_quality=70, client_files=client_files)
+        api.tasks_data_create(task_data, task_model.id)
 
-        # Upload the images.
-        logger.info("Uploading task images...")
-        cli = CLI(auth.session, auth.api, auth.credentials,)
-        cli.tasks_data(task_id, ResourceType.LOCAL, images)
+        return cls(task_id=task_model.id, api_client=api_client)
 
-        # Download the created task data locally.
-        with cls.download(task_id=task_id, auth=auth) as task:
-            yield task
-
-    def __init__(self, *, project_dir: Path, cvat_cli: CLI, task_id: int):
+    def __init__(self, *, task_id: int, **kwargs: Any):
         """
-        *Note: In general, this class is not meant to be instantiated directly.
-        Use the factory methods instead.*
-
         Args:
-            project_dir: The path to the task directory on the disk.
-            cvat_cli: The CLI object to use for communicating with the CVAT
-                server.
             task_id: The numerical ID of the task.
+            **kwargs: Will be forwarded to the superclass.
         """
-        self.__cli = cvat_cli
+        super().__init__(**kwargs)
+
+        self.__task_api = TasksApi(self.api)
         self.__task_id = task_id
 
-        # Open the project.
-        logger.debug("Opening project under {}.", project_dir)
-        self.__project = Project.load(project_dir.as_posix())
-
-        self.__remove_external_sources()
-
-    def __remove_external_sources(self) -> None:
+    @ClearableCachedProperty
+    def __task_data(self) -> TaskModel:
         """
-        Removes all external sources from the project. We do this because we
-        download the images manually, and only want to use *local* annotation
-        data from the project.
+        Gets the general task data from the API.
+
+        Returns:
+            The task data that it got.
 
         """
-        source_names = list(self.__project.env.sources.items.keys())
-        for source_name in source_names:
-            logger.debug("Removing project source '{}'.", source_name)
-            self.__project.remove_source(source_name)
+        logger.debug("Downloading data for task {}.", self.__task_id)
+        return self.__task_api.tasks_read(self.__task_id)
 
-    @contextmanager
-    def __download_image(
-        self, frame_num: int, output_dir: Path
-    ) -> ContextManager[Path]:
+    def __download_image(self, frame_num: int) -> np.ndarray:
         """
-        Downloads an image from the CVAT server. This is meant to be used as
-        a context manager; the downloaded image will be deleted upon exit.
+        Downloads an image from the CVAT server.
 
         Args:
             frame_num: The number of the frame to load.
-            output_dir: The directory to save the downloaded image in.
 
         Returns:
-            The path to the image that it downloaded.
+            The raw image data that it downloaded.
 
         """
         # Download the image.
         logger.debug("Downloading image for frame {}.", frame_num)
-        self.__cli.tasks_frame(
+        task = self.__task_api.tasks_data_read(
             self.__task_id,
-            frame_ids=[frame_num],
-            outdir=output_dir,
-            quality="original",
+            "frame",
+            "original",
+            frame_num,
+            # This is necessary, because otherwise Swagger tries to decode
+            # the image data as UTF-8.
+            _preload_content=False,
         )
 
-        # The image is saved in this format.
-        image_name = f"task_{self.__task_id}_frame_{frame_num:06d}.jpg"
-        image_path = output_dir / image_name
-
-        try:
-            yield image_path
-
-        finally:
-            # Delete the downloaded image.
-            logger.debug("Deleting downloaded frame {}.", image_path)
-            if image_path.exists():  # pragma: no cover
-                # This case is really hard to test, so we don't.
-                image_path.unlink()
-
-    @contextmanager
-    def __make_zip(self) -> ContextManager[Path]:
-        """
-        Creates a zipped version of the project directory.
-
-        Returns:
-            The path to the zip file that it created. It will be deleted upon
-            exit from the context.
-        """
-        with tempfile.TemporaryDirectory() as output_dir:
-            output_dir = Path(output_dir)
-            project_dir = output_dir / "project_cvat"
-            project_dir.mkdir()
-            zip_path = output_dir / "project_cvat_zip"
-
-            # Save to CVAT format.
-            self.dataset.export_project(
-                save_dir=project_dir, converter=CvatConverter.convert
-            )
-
-            # Create the archive.
-            archive_name = shutil.make_archive(
-                zip_path, "zip", root_dir=project_dir
-            )
-            archive_path = output_dir / archive_name
-            logger.debug("Created project archive {}.", archive_path)
-
-            yield archive_path
-
-    @cached_property
-    def dataset(self) -> ProjectDataset:
-        """
-        Returns:
-            The `Dataset` for the loaded task.
-        """
-        return self.__project.make_dataset()
+        return np.fromstring(task.data, dtype=np.uint8)
 
     @lru_cache(maxsize=_MAX_IMAGES_TO_CACHE)
     def get_image(
@@ -273,34 +135,59 @@ class Task:
             The image that it loaded.
 
         """
-        with ExitStack() as exit_stack:
-            # Download the image to a temporary directory.
-            image_dir = Path(
-                exit_stack.enter_context(tempfile.TemporaryDirectory())
-            )
-            image_path = exit_stack.enter_context(
-                self.__download_image(frame_num, image_dir)
-            )
+        image = self.__download_image(frame_num)
 
-            if not compressed:
-                # Load the image data.
-                return load_image(image_path.as_posix()).astype(np.uint8)
-            else:
-                return np.fromfile(image_path.as_posix(), dtype=np.uint8)
+        if not compressed:
+            # Load the image data.
+            return cv2.imdecode(image, cv2.IMREAD_UNCHANGED)
+        else:
+            return image
 
-    def upload(self) -> None:
+    def get_jobs(self) -> List[Job]:
         """
-        Uploads the current version of the project to CVAT.
+        Gets all the jobs associated with this task.
+
+        Returns:
+            The jobs for the task.
+
         """
-        logger.info("Uploading project...")
+        # Get the job numbers.
+        segments = self.__task_data.segments
+        all_jobs = []
+        for segment in segments:
+            all_jobs.extend([j.id for j in segment.jobs])
+        logger.debug("Got job IDs {} for task {}.", all_jobs, self.__task_id)
 
-        # Create a zip of the project.
-        with self.__make_zip() as zip_path:
-            self.__cli.tasks_upload(
-                self.__task_id, "CVAT 1.1", zip_path.as_posix()
-            )
+        # Create the Job objects.
+        return [Job(job_id=i, api_client=self.__jobs_api) for i in all_jobs]
 
-        logger.info("Project uploaded.")
+    def get_labels(self) -> List[Label]:
+        """
+        Returns:
+            The labels associated with this task.
+
+        """
+        return self.__task_data.labels[:]
+
+    def find_label(self, name: str) -> Label:
+        """
+        Gets a label with a specific name.
+
+        Args:
+            name: The name of the desired label.
+
+        Returns:
+            The label it found.
+
+        Raises:
+            NameError if there is no label with that name.
+
+        """
+        for label in self.get_labels():
+            if label.name == name:
+                return label
+
+        raise NameError(f"There is no label with name '{name}'.")
 
     @property
     def id(self) -> int:
@@ -309,3 +196,17 @@ class Task:
             The ID for the task.
         """
         return self.__task_id
+
+    def reload(self) -> None:
+        logger.debug("Forcing data reload.")
+
+        Task.__task_data.flush_cache(self)
+        # Clear all cached images.
+        self.get_image.cache_clear()
+
+    def upload(self) -> None:
+        logger.debug("Uploading task data to CVAT.")
+
+        # Make sure all the job data is up-to-date.
+        for job in self.get_jobs():
+            job.upload()
