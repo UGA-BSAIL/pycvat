@@ -179,7 +179,6 @@ toml = ["toml"]
 [[package]]
 category = "main"
 description = "CVAT REST API"
-develop = false
 name = "cvat-api"
 optional = false
 python-versions = "*"
@@ -192,10 +191,9 @@ six = ">=1.10"
 urllib3 = ">=1.15"
 
 [package.source]
-reference = ""
-type = "directory"
-url = "cvat_api"
-
+reference = "65ebd052f7a401139411defbaea2c3a67085eff3"
+type = "git"
+url = "git@github.com:UGA-BSAIL/cvat_api.git"
 [[package]]
 category = "main"
 description = "Composable style cycles"
@@ -1258,7 +1256,7 @@ docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
 testing = ["pytest (>=3.5,<3.7.3 || >3.7.3)", "pytest-checkdocs (>=1.2.3)", "pytest-flake8", "pytest-cov", "jaraco.test (>=3.2.0)", "jaraco.itertools", "func-timeout", "pytest-black (>=0.3.7)", "pytest-mypy"]
 
 [metadata]
-content-hash = "45a8261f26447e27e95ac5d4d00ee50e7a65153d2f3e5dff0dbad7ad50145a2d"
+content-hash = "591c41eaab28f5fb679bd7ed83d364a80d5f83973c6ed1f21b0fe703a1642ab7"
 lock-version = "1.0"
 python-versions = "~3.7"
 
