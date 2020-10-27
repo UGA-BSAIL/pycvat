@@ -10,7 +10,6 @@ python = "~3.7"
 requests = "^2.24.0"
 loguru = "^0.5.1"
 pillow = "^7.2.0"
-datumaro = {git = "https://github.com/openvinotoolkit/datumaro", tag = "v0.1.0"}
 methodtools = "^0.4.2"
 numpy = ">=1.16"
 opencv-python = "^4.4.0"
@@ -18,7 +17,6 @@ opencv-contrib-python = "^4.4.0"
 pydantic = "^1.6.1"
 kedro = "^0.16.4"
 "backports.cached-property" = "^1.0.0"
-tenacity = "^6.2.0"
 cvat-api = {git = "git@github.com:UGA-BSAIL/cvat_api.git", tag = "v1.0.0"}
 singledispatchmethod = "^1.0"
 
