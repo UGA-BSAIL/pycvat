@@ -4,12 +4,11 @@ Main file for CVAT tracker utility.
 
 
 from argparse import ArgumentParser
-from contextlib import ExitStack
 
 from loguru import logger
 
-from ..dataset.api import Authenticator
-from ..dataset.cvat_handle import CvatHandle
+from ..dataset.api import make_api_client
+from ..dataset.task import Task
 from .tracker import Tracker
 
 
@@ -49,6 +48,13 @@ def _make_parser() -> ArgumentParser:
         help="The numerical ID of the task to modify.",
     )
     parser.add_argument(
+        "-j",
+        "--job-num",
+        type=int,
+        default=0,
+        help="The job number within the task to modify.",
+    )
+    parser.add_argument(
         "-f", "--frame", type=int, help="The frame to start tracking at."
     )
 
@@ -67,18 +73,14 @@ def main() -> None:
     parser = _make_parser()
     args = parser.parse_args()
 
-    with ExitStack() as exit_stack:
-        auth = exit_stack.enter_context(
-            Authenticator.from_new_session(
-                user=args.username, password=args.password, host=args.url
-            )
-        )
-        provider = exit_stack.enter_context(
-            CvatHandle.for_task(task_id=args.task_id, auth=auth)
-        )
-
+    api_client = make_api_client(
+        user=args.username, password=args.password, host=args.url
+    )
+    with Task.init_and_upload(
+        task_id=args.task_id, api_client=api_client
+    ) as task:
         # Update the annotations with tracking.
-        tracker = Tracker(provider)
+        tracker = Tracker(task, job_num=args.job_num)
         tracker.track_forward(
             start_frame=args.frame, show_result=args.show_result
         )

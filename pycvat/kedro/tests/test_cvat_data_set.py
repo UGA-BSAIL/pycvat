@@ -3,14 +3,13 @@ Tests for the `cvat_data_set` module.
 """
 
 import unittest.mock as mock
-from typing import Any, Dict
 
 import pytest
 from faker import Faker
 from pydantic.dataclasses import dataclass
 from pytest_mock import MockFixture
 
-from pycvat.dataset import CvatHandle
+from pycvat.dataset.task import Task
 from pycvat.kedro import cvat_data_set
 from pycvat.type_helpers import ArbitraryTypesConfig
 
@@ -27,19 +26,23 @@ class TestCvatDataSet:
 
         Attributes:
             data_set: The `CvatDataSet` object under test.
-            mock_cvat_handle_class: The mocked `CvatHandle` class.
-            mock_auth_data_set_class: The mocked `CvatAuthDataSet` class.
+            mock_task_class: The mocked `Task` class to use.
+            mock_make_api_client: The mocked `make_api_client` function.
 
             task_id: The task ID to use for testing.
-            auth_kwargs: The keyword arguments passed to the `CvatAuthDataSet`.
+            username: The fake username for authentication.
+            password: The fake password for authentication.
+            host: The fake host for authentication.
         """
 
         data_set: cvat_data_set.CvatDataSet
-        mock_cvat_handle_class: mock.Mock
-        mock_auth_data_set_class: mock.Mock
+        mock_task_class: mock.Mock
+        mock_make_api_client: mock.Mock
 
         task_id: int
-        auth_kwargs: Dict[str, Any]
+        username: str
+        password: str
+        host: str
 
     @classmethod
     @pytest.fixture
@@ -56,29 +59,48 @@ class TestCvatDataSet:
 
         """
         # Mock the dependencies.
-        mock_auth_data_set_class = mocker.patch(
-            cvat_data_set.__name__ + ".CvatAuthDataSet"
-        )
-        mock_cvat_handle_class = mocker.patch(
-            cvat_data_set.__name__ + ".CvatHandle"
+        mock_task_class = mocker.patch(cvat_data_set.__name__ + ".Task")
+        mock_make_api_client = mocker.patch(
+            cvat_data_set.__name__ + ".make_api_client"
         )
 
         task_id = faker.random_int()
-        auth_kwargs = faker.pydict()
+        username = faker.simple_profile()["username"]
+        password = faker.pystr()
+        host = faker.url()
 
-        data_set = cvat_data_set.CvatDataSet(task_id=task_id, **auth_kwargs)
+        data_set = cvat_data_set.CvatDataSet(
+            task_id=task_id,
+            credentials={"username": username, "password": password},
+            host=host,
+        )
 
         yield cls.ConfigForTests(
             data_set=data_set,
-            mock_auth_data_set_class=mock_auth_data_set_class,
-            mock_cvat_handle_class=mock_cvat_handle_class,
+            mock_task_class=mock_task_class,
+            mock_make_api_client=mock_make_api_client,
             task_id=task_id,
-            auth_kwargs=auth_kwargs,
+            username=username,
+            password=password,
+            host=host,
         )
 
         # Manually call the destructor before the mocks exit scope, since it
         # needs the mocks to be active to work.
         data_set.__del__()
+
+    def test_init(self, config: ConfigForTests) -> None:
+        """
+        Tests that the initialization process works correctly.
+
+        Args:
+            config: The configuration to use for testing.
+
+        """
+        # Assert.
+        config.mock_make_api_client.assert_called_once_with(
+            user=config.username, password=config.password, host=config.host
+        )
 
     @pytest.mark.parametrize(
         "cvat_connected",
@@ -107,10 +129,10 @@ class TestCvatDataSet:
         # Assert.
         if cvat_connected:
             # It should have exited the context that it created.
-            config.mock_cvat_handle_class.for_task.return_value.__exit__.assert_called_once()
+            config.mock_task_class.init_and_upload.return_value.__exit__.assert_called_once()
         else:
             # It should not have touched the CVAT stuff.
-            config.mock_cvat_handle_class.for_task.return_value.__exit__.assert_not_called()
+            config.mock_task_class.init_and_upload.return_value.__exit__.assert_not_called()
 
     def test_load(self, config: ConfigForTests) -> None:
         """
@@ -124,26 +146,20 @@ class TestCvatDataSet:
         got_data = config.data_set.load()
 
         # Assert.
-        # It should have set up the CvatHandle.
-        config.mock_auth_data_set_class.assert_called_once_with(
-            **config.auth_kwargs
-        )
-        mock_auth = (
-            config.mock_auth_data_set_class.return_value.load.return_value
-        )
-
-        config.mock_cvat_handle_class.for_task.assert_called_once_with(
-            task_id=config.task_id, auth=mock_auth
+        # It should have set up the Task.
+        mock_api = config.mock_make_api_client.return_value
+        config.mock_task_class.init_and_upload.assert_called_once_with(
+            task_id=config.task_id, api_client=mock_api
         )
 
         # It should not have exited the context.
-        config.mock_cvat_handle_class.for_task.return_value.__exit__.assert_not_called()
+        config.mock_task_class.init_and_upload.return_value.__exit__.assert_not_called()
 
-        # It should have just given us the CVAT handle.
-        mock_handle = (
-            config.mock_cvat_handle_class.for_task.return_value.__enter__.return_value
+        # It should have just given us the task.
+        mock_task = (
+            config.mock_task_class.init_and_upload.return_value.__enter__.return_value
         )
-        assert got_data == mock_handle
+        assert got_data == mock_task
 
     def test_save(self, config: ConfigForTests, mocker: MockFixture) -> None:
         """
@@ -156,14 +172,14 @@ class TestCvatDataSet:
         """
         # Arrange.
         # Create fake data to try saving.
-        mock_handle = mocker.create_autospec(CvatHandle, instance=True)
+        mock_task = mocker.create_autospec(Task, instance=True)
 
         # Act.
-        config.data_set.save(mock_handle)
+        config.data_set.save(mock_task)
 
         # Assert.
         # It should have uploaded the data to the server.
-        mock_handle.upload_now.assert_called_once_with()
+        mock_task.upload.assert_called_once_with()
 
     def test_exists(self, config: ConfigForTests) -> None:
         """

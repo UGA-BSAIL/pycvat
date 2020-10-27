@@ -6,7 +6,7 @@ Testing configuration file.
 import pytest
 from faker import Faker
 
-from .faker_providers import CvatProvider
+from .faker_providers import DataModelProvider
 
 
 @pytest.fixture(autouse=True)
@@ -32,4 +32,4 @@ def add_custom_faker_providers(faker: Faker) -> None:
         faker: The fixture to use for creating fake data.
 
     """
-    faker.add_provider(CvatProvider)
+    faker.add_provider(DataModelProvider)

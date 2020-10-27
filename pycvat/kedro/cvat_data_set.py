@@ -24,7 +24,7 @@ class CvatDataSet(AbstractDataSet):
         *,
         task_id: int,
         credentials: Dict[str, str],
-        host: str = "localhost:8080"
+        host: str = "http://localhost:8080/api/v1"
     ):
         """
         Args:

@@ -4,16 +4,15 @@ Manages downloading and opening annotations from a CVAT task.
 
 
 from pathlib import Path
-from typing import Any, Iterable, List
+from typing import Any, Dict, Iterable, List, Tuple
 
 import cv2
 import numpy as np
-from loguru import logger
-from methodtools import lru_cache
-
-from cvat_api import ApiClient, ClientFile, Data, Label
+from cvat_api import ApiClient, ClientFile, Data, DataMeta, Label
 from cvat_api import Task as TaskModel
 from cvat_api import TasksApi
+from loguru import logger
+from methodtools import lru_cache
 
 from .clearable_cached_property import ClearableCachedProperty
 from .cvat_connector import CvatConnector
@@ -40,6 +39,7 @@ class Task(CvatConnector):
         labels: Iterable[Label],
         bug_tracker: str = "",
         images: List[Path] = [],
+        image_quality: int = 70,
     ) -> "Task":
         """
         Creates a brand new task and uploads it to the server.
@@ -50,6 +50,7 @@ class Task(CvatConnector):
             labels: The annotation labels that should be used for the new task.
             bug_tracker: Specify the URL of a bug tracker for the new task.
             images: A list of the paths to the images to annotate for this task.
+            image_quality: Image quality to use for the task, between 0 and 100.
 
         Returns:
             The task that it created.
@@ -66,7 +67,9 @@ class Task(CvatConnector):
         # Add the images to the task.
         logger.debug("Uploading task images...")
         client_files = [ClientFile(file=i) for i in images]
-        task_data = Data(image_quality=70, client_files=client_files)
+        task_data = Data(
+            image_quality=image_quality, client_files=client_files
+        )
         api.tasks_data_create(task_data, task_model.id)
 
         return cls(task_id=task_model.id, api_client=api_client)
@@ -94,6 +97,28 @@ class Task(CvatConnector):
         logger.debug("Downloading data for task {}.", self.__task_id)
         return self.__task_api.tasks_read(self.__task_id)
 
+    @ClearableCachedProperty
+    def __task_metadata(self) -> DataMeta:
+        """
+        Gets the task metadata from the API.
+
+        Returns:
+            The task metadata that it got.
+
+        """
+        logger.debug("Downloading metadata for task {}.", self.__task_id)
+        return self.__task_api.tasks_data_data_info(self.__task_id)
+
+    @ClearableCachedProperty
+    def __image_name_to_frame_num(self) -> Dict[str, int]:
+        """
+        Returns:
+            A mapping of image names to their corresponding frame numbers.
+
+        """
+        frame_data = self.__task_metadata.frames
+        return {f.name: i for i, f in enumerate(frame_data)}
+
     def __download_image(self, frame_num: int) -> np.ndarray:
         """
         Downloads an image from the CVAT server.
@@ -117,7 +142,7 @@ class Task(CvatConnector):
             _preload_content=False,
         )
 
-        return np.fromstring(task.data, dtype=np.uint8)
+        return np.frombuffer(task.data, dtype=np.uint8)
 
     @lru_cache(maxsize=_MAX_IMAGES_TO_CACHE)
     def get_image(
@@ -143,6 +168,20 @@ class Task(CvatConnector):
         else:
             return image
 
+    def get_image_size(self, frame_num: int) -> Tuple[int, int]:
+        """
+        Gets the width and height of a frame in pixels.
+
+        Args:
+            frame_num: The frame number to get the size of.
+
+        Returns:
+            The width and height of the frame.
+
+        """
+        frame_info = self.__task_metadata.frames[frame_num]
+        return frame_info.width, frame_info.height
+
     def get_jobs(self) -> List[Job]:
         """
         Gets all the jobs associated with this task.
@@ -159,7 +198,7 @@ class Task(CvatConnector):
         logger.debug("Got job IDs {} for task {}.", all_jobs, self.__task_id)
 
         # Create the Job objects.
-        return [Job(job_id=i, api_client=self.__jobs_api) for i in all_jobs]
+        return [Job(job_id=i, api_client=self.api) for i in all_jobs]
 
     def get_labels(self) -> List[Label]:
         """
@@ -189,6 +228,19 @@ class Task(CvatConnector):
 
         raise NameError(f"There is no label with name '{name}'.")
 
+    def find_image_frame_num(self, name: str) -> int:
+        """
+        Finds an image's frame number by its name.
+
+        Args:
+            name: The name of the frame to find.
+
+        Returns:
+            The frame number.
+
+        """
+        return self.__image_name_to_frame_num[name]
+
     @property
     def id(self) -> int:
         """
@@ -201,6 +253,9 @@ class Task(CvatConnector):
         logger.debug("Forcing data reload.")
 
         Task.__task_data.flush_cache(self)
+        Task.__task_metadata.flush_cache(self)
+        Task.__image_name_to_frame_num.flush_cache(self)
+
         # Clear all cached images.
         self.get_image.cache_clear()
 

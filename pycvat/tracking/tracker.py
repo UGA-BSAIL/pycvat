@@ -8,10 +8,10 @@ from typing import List, Tuple
 
 import cv2
 import numpy as np
-from datumaro.components.extractor import Points
+from cvat_api import LabeledShape
 from loguru import logger
 
-from ..dataset import CvatHandle
+from ..dataset.task import Task
 
 
 class Tracker:
@@ -42,12 +42,14 @@ class Tracker:
     Value of K for KNN matching.
     """
 
-    def __init__(self, dataset: CvatHandle):
+    def __init__(self, task: Task, job_num: int = 0):
         """
         Args:
-            dataset: The `CvatHandle` to source data from for tracking.
+            task: The `Task` to source data from for tracking.
+            job_num: The job number within this task to extract data from.
         """
-        self.__dataset = dataset
+        self.__task = task
+        self.__job_num = job_num
 
         # Create a SIFT extractor and matcher to use.
         self.__sift = cv2.SIFT_create()
@@ -201,9 +203,9 @@ class Tracker:
         self,
         previous_frame: np.ndarray,
         next_frame: np.ndarray,
-        annotations: List[Points],
+        annotations: List[LabeledShape],
         show_result: bool = False,
-    ) -> List[Points]:
+    ) -> List[LabeledShape]:
         """
         Performs a single tracking step.
 
@@ -236,19 +238,19 @@ class Tracker:
                 next_frame=next_frame,
             )
 
-        # Convert back to the Datumaro format.
+        # Convert back to the CVAT format.
         return self.__cv_to_annotations(
             cv_points=next_points, original_annotations=annotations,
         )
 
     @staticmethod
-    def __annotations_to_cv(annotations: List[Points]) -> np.ndarray:
+    def __annotations_to_cv(annotations: List[LabeledShape]) -> np.ndarray:
         """
         Converts a list of annotations to a set of points that OpenCV can
         understand.
 
         Args:
-            annotations: The list of annotations to convert.
+            annotations: The annotations for several frames.
 
         Returns:
             The annotations in OpenCV form.
@@ -263,10 +265,13 @@ class Tracker:
 
     @classmethod
     def __cv_to_annotations(
-        cls, *, cv_points: np.ndarray, original_annotations: List[Points],
-    ) -> List[Points]:
+        cls,
+        *,
+        cv_points: np.ndarray,
+        original_annotations: List[LabeledShape],
+    ) -> List[LabeledShape]:
         """
-        Converts a set of points from OpenCV to the Datumaro annotations format.
+        Converts a set of points from OpenCV to the CVAT annotations format.
 
         Args:
             cv_points: The points from OpenCV.
@@ -274,7 +279,7 @@ class Tracker:
                 Should correspond exactly to the OpenCV variants.
 
         Returns:
-            A list of Datumaro annotations.
+            A list of CVAT annotations.
 
         """
         annotations = []
@@ -282,11 +287,6 @@ class Tracker:
         flat_point_index = 0
 
         for old_annotation in original_annotations:
-            # Add a special attribute to make it clear that this point was
-            # automatically generated.
-            attributes = old_annotation.attributes
-            attributes[cls._AUTO_TRACK_ATTRIBUTE_NAME] = True
-
             # Make sure to grab the correct number of points for this
             # annotation.
             num_points = len(old_annotation.points)
@@ -296,14 +296,17 @@ class Tracker:
             flat_point_index += num_points
 
             # Carry over all the metadata from the original annotation.
-            annotation = Points(
-                points=new_points.tolist(),
-                visibility=old_annotation.visibility,
-                label=old_annotation.label,
+            annotation = LabeledShape(
+                type=old_annotation.type,
+                occluded=old_annotation.occluded,
                 z_order=old_annotation.z_order,
+                points=new_points.tolist(),
                 id=old_annotation.id,
+                frame=old_annotation.frame,
+                label_id=old_annotation.label_id,
                 group=old_annotation.group,
-                attributes=attributes,
+                source=old_annotation.source,
+                attributes=old_annotation.attributes,
             )
             annotations.append(annotation)
 
@@ -311,7 +314,7 @@ class Tracker:
 
     def track_forward(
         self, start_frame: int = 0, show_result: bool = False
-    ) -> List[Points]:
+    ) -> List[LabeledShape]:
         """
         Tracks each annotation in the initial frame forward by one frame. The
         updated annotations will automatically be saved in the cvat.
@@ -325,12 +328,12 @@ class Tracker:
             An amended list of annotations for the subsequent frame.
 
         """
-        frame_data = self.__dataset.iter_frames_and_annotations(
-            start_at=start_frame
-        )
-        frame_iter = iter(frame_data)
-        first_frame, first_annotations = next(frame_iter)
-        next_frame, next_annotations = next(frame_iter)
+        job = self.__task.get_jobs()[self.__job_num]
+
+        first_frame = self.__task.get_image(start_frame)
+        first_annotations = job.annotations_for_frame(start_frame)
+        next_frame = self.__task.get_image(start_frame + 1)
+        next_annotations = job.annotations_for_frame(start_frame + 1)
 
         # Propagate the annotations forward.
         propagated_annotations = self.__track_annotations(
@@ -344,6 +347,6 @@ class Tracker:
         updated_annotations = next_annotations + propagated_annotations
 
         # Save the annotations.
-        self.__dataset.update_annotations(start_frame + 1, updated_annotations)
+        job.update_annotations(updated_annotations)
 
         return updated_annotations

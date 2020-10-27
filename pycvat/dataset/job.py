@@ -1,7 +1,5 @@
-from typing import Any, Dict, Iterable, List, Optional, Union
-
-from loguru import logger
-from singledispatchmethod import singledispatchmethod
+import itertools
+from typing import Any, Dict, Iterable, List, Optional
 
 from cvat_api import Job as JobModel
 from cvat_api import (
@@ -11,14 +9,12 @@ from cvat_api import (
     LabeledShape,
     LabeledTrack,
 )
+from loguru import logger
+from singledispatchmethod import singledispatchmethod
 
+from ..type_helpers import LabeledObject
 from .clearable_cached_property import ClearableCachedProperty
 from .cvat_connector import CvatConnector
-
-LabeledObject = Union[LabeledImage, LabeledShape, LabeledTrack]
-"""
-Type alias for any type of annotation.
-"""
 
 
 class Job(CvatConnector):
@@ -60,6 +56,26 @@ class Job(CvatConnector):
         return self.__jobs_api.jobs_annotations_read(self.__job_id)
 
     @classmethod
+    def __append_or_create(
+        cls, my_dict: Dict[Any, List], key: Any, value: Any
+    ) -> None:
+        """
+        Utility for dealing with dicts that have lists as elements. If a key
+        already exists, it appends the element. Otherwise, it adds the key
+        and sets the value to a new list with that element as its single
+        member.
+
+        Args:
+            my_dict: Dictionary to add to.
+            key: The key to add.
+            value: The value to add.
+
+        """
+        if key not in my_dict:
+            my_dict[key] = []
+        my_dict[key].append(value)
+
+    @classmethod
     def __frames_to_annotations(
         cls, annotations: Iterable[LabeledObject]
     ) -> Dict[int, List[LabeledObject]]:
@@ -76,9 +92,9 @@ class Job(CvatConnector):
         """
         frames_to_annotations = {}
         for annotation in annotations:
-            if annotation.frame not in frames_to_annotations:
-                frames_to_annotations[annotation.frame] = []
-            frames_to_annotations[annotation.frame].append(annotation)
+            cls.__append_or_create(
+                frames_to_annotations, annotation.frame, annotation
+            )
 
         return frames_to_annotations
 
@@ -150,13 +166,13 @@ class Job(CvatConnector):
             yield self.annotations_for_frame(frame_num)
 
     @singledispatchmethod
-    def update_annotations(self, annotations: Any) -> None:
+    def update_annotations(self, annotations: Any) -> None:  # pragma: no cover
         """
         Updates the annotations for a single frame.
 
         Args:
-            annotations: The new annotations for that frame. The frame number
-                will be read from the annotations object.
+            annotations: The additional annotations for that frame. The frame
+                number will be read from the annotations object.
 
         """
         raise NotImplementedError(
@@ -166,25 +182,42 @@ class Job(CvatConnector):
 
     @update_annotations.register
     def _(self, annotations: LabeledImage) -> None:
-        self.__frames_to_tags[annotations.frame] = annotations
+        self.__append_or_create(
+            self.__frames_to_tags, annotations.frame, annotations
+        )
 
     @update_annotations.register
     def _(self, annotations: LabeledShape) -> None:
-        self.__frames_to_shapes[annotations.frame] = annotations
+        self.__append_or_create(
+            self.__frames_to_shapes, annotations.frame, annotations
+        )
 
     @update_annotations.register
     def _(self, annotations: LabeledTrack) -> None:
-        self.__frames_to_tracks[annotations.frame] = annotations
+        self.__append_or_create(
+            self.__frames_to_tracks, annotations.frame, annotations
+        )
 
     def upload(self) -> None:
         logger.debug("Uploading annotations to CVAT.")
 
+        # Flatten all the annotations.
+        tags = list(
+            itertools.chain.from_iterable(self.__frames_to_tags.values())
+        )
+        shapes = list(
+            itertools.chain.from_iterable(self.__frames_to_shapes.values())
+        )
+        tracks = list(
+            itertools.chain.from_iterable(self.__frames_to_tracks.values())
+        )
+
         # Generate the new annotation data.
         annotations = LabeledData(
             version=self.__annotations.version,
-            tags=list(self.__frames_to_tags.values()),
-            shapes=list(self.__frames_to_shapes.values()),
-            tracks=list(self.__frames_to_tracks.values()),
+            tags=tags,
+            shapes=shapes,
+            tracks=tracks,
         )
 
         self.__jobs_api.jobs_annotations_update(annotations, self.__job_id)
