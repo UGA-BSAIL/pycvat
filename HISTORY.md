@@ -39,3 +39,9 @@
 ### v0.6.1 (2020-10-21)
 
 - Fix a missing import alias.
+
+### v0.7.0 (2020-10-27)
+
+- Completely rewrite the CVAT connector layer.
+- No longer uses the CVAT CLI and `datamuro` internally.
+- Connects directly to CVAT using swagger-generated client.
