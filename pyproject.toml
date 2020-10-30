@@ -6,7 +6,7 @@ authors = ["Daniel Petti <djpetti@gmail.com>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "~3.7"
+python = ">=3.7,<3.9"
 requests = "^2.24.0"
 loguru = "^0.5.1"
 pillow = "^7.2.0"
