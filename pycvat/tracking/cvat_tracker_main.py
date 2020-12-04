@@ -37,8 +37,8 @@ def _make_parser() -> ArgumentParser:
     )
     parser.add_argument(
         "--url",
-        default="localhost:8080",
-        help="The CVAT server to connect to.",
+        default="http://localhost:8080/api/v1/",
+        help="The CVAT API endpoint to connect to.",
     )
 
     parser.add_argument(

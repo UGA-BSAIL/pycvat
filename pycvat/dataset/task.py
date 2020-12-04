@@ -182,7 +182,8 @@ class Task(CvatConnector):
         frame_info = self.__task_metadata.frames[frame_num]
         return frame_info.width, frame_info.height
 
-    def get_jobs(self) -> List[Job]:
+    @ClearableCachedProperty
+    def jobs(self) -> List[Job]:
         """
         Gets all the jobs associated with this task.
 
@@ -255,6 +256,7 @@ class Task(CvatConnector):
         Task.__task_data.flush_cache(self)
         Task.__task_metadata.flush_cache(self)
         Task.__image_name_to_frame_num.flush_cache(self)
+        Task.jobs.flush_cache(self)
 
         # Clear all cached images.
         self.get_image.cache_clear()
@@ -263,5 +265,5 @@ class Task(CvatConnector):
         logger.debug("Uploading task data to CVAT.")
 
         # Make sure all the job data is up-to-date.
-        for job in self.get_jobs():
+        for job in self.jobs:
             job.upload()

@@ -204,6 +204,8 @@ class Tracker:
         previous_frame: np.ndarray,
         next_frame: np.ndarray,
         annotations: List[LabeledShape],
+        *,
+        next_frame_num: int,
         show_result: bool = False,
     ) -> List[LabeledShape]:
         """
@@ -213,6 +215,7 @@ class Tracker:
             previous_frame: The first frame that the annotations appear in.
             next_frame: The frame after that.
             annotations: The annotations that appear in the first frame.
+            next_frame_num: The frame number to use for the new annotations.
             show_result: Whether to display the tracking result for debugging
                 purposes.
 
@@ -240,7 +243,9 @@ class Tracker:
 
         # Convert back to the CVAT format.
         return self.__cv_to_annotations(
-            cv_points=next_points, original_annotations=annotations,
+            cv_points=next_points,
+            original_annotations=annotations,
+            frame_num=next_frame_num,
         )
 
     @staticmethod
@@ -268,6 +273,7 @@ class Tracker:
         cls,
         *,
         cv_points: np.ndarray,
+        frame_num: int,
         original_annotations: List[LabeledShape],
     ) -> List[LabeledShape]:
         """
@@ -275,6 +281,7 @@ class Tracker:
 
         Args:
             cv_points: The points from OpenCV.
+            frame_num: The frame number to set for the new annotations.
             original_annotations: The original annotations for these points.
                 Should correspond exactly to the OpenCV variants.
 
@@ -301,8 +308,7 @@ class Tracker:
                 occluded=old_annotation.occluded,
                 z_order=old_annotation.z_order,
                 points=new_points.tolist(),
-                id=old_annotation.id,
-                frame=old_annotation.frame,
+                frame=frame_num,
                 label_id=old_annotation.label_id,
                 group=old_annotation.group,
                 source=old_annotation.source,
@@ -328,12 +334,11 @@ class Tracker:
             An amended list of annotations for the subsequent frame.
 
         """
-        job = self.__task.get_jobs()[self.__job_num]
+        job = self.__task.jobs[self.__job_num]
 
         first_frame = self.__task.get_image(start_frame)
         first_annotations = job.annotations_for_frame(start_frame)
         next_frame = self.__task.get_image(start_frame + 1)
-        next_annotations = job.annotations_for_frame(start_frame + 1)
 
         # Propagate the annotations forward.
         propagated_annotations = self.__track_annotations(
@@ -341,12 +346,11 @@ class Tracker:
             next_frame,
             first_annotations,
             show_result=show_result,
+            next_frame_num=start_frame + 1,
         )
 
-        # Merge the propagated annotations with any existing ones.
-        updated_annotations = next_annotations + propagated_annotations
-
         # Save the annotations.
-        job.update_annotations(updated_annotations)
+        for annotation in propagated_annotations:
+            job.update_annotations(annotation)
 
-        return updated_annotations
+        return job.annotations_for_frame(start_frame + 1)

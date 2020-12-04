@@ -229,7 +229,7 @@ class TestTask:
         mock_tasks_api.tasks_read.return_value = job_mocks.mock_task_model
 
         # Act.
-        got_jobs = config.task.get_jobs()
+        got_jobs = config.task.jobs
 
         # Assert.
         # It should have initialized the Job instances.

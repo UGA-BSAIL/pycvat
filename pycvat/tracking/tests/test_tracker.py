@@ -2,7 +2,6 @@
 Tests for the `tracker` module.
 """
 
-
 import unittest.mock as mock
 
 import cv2
@@ -120,9 +119,6 @@ class TestTracker:
         first_annotations = faker.labeled_data(
             min_frame=start_frame, max_frame=start_frame
         ).shapes
-        next_annotations = faker.labeled_data(
-            min_frame=start_frame + 1, max_frame=start_frame + 1
-        ).shapes
 
         # Make it look like we have some frame data.
         mock_first_frame = mocker.create_autospec(np.ndarray, instance=True)
@@ -136,9 +132,9 @@ class TestTracker:
         mock_job = mocker.Mock(spec=Job)
         mock_job.annotations_for_frame.side_effect = [
             first_annotations,
-            next_annotations,
+            mocker.DEFAULT,
         ]
-        config.mock_task.get_jobs.return_value = [mock_job]
+        config.mock_task.jobs = [mock_job]
 
         # Make it look like SIFT feature extraction produces valid results.
         config.mock_sift.detectAndCompute.return_value = (
@@ -162,22 +158,16 @@ class TestTracker:
         )
 
         # Assert.
-        # It should have added the new annotations to the original ones.
-        assert len(updated_annotations) == len(first_annotations) + len(
-            next_annotations
+        # It should have saved the additional annotations.
+        mock_job.update_annotations.assert_has_calls(
+            [mocker.call(config.mock_labeled_shape_class.return_value)]
+            * len(first_annotations)
         )
-        for annotation in next_annotations:
-            # The original annotations on the second frame should have not
-            # been touched.
-            assert annotation in updated_annotations
-        for annotation in first_annotations:
-            # The original annotations on the first frame should have been
-            # changed.
-            assert annotation not in updated_annotations
 
-        # It should have saved the updated annotations.
-        mock_job.update_annotations.assert_called_once_with(
-            updated_annotations
+        # It should have returned the combined annotations.
+        mock_job.annotations_for_frame.assert_any_call(start_frame + 1)
+        assert (
+            updated_annotations == mock_job.annotations_for_frame.return_value
         )
 
     @pytest.mark.slow
@@ -201,29 +191,26 @@ class TestTracker:
         frame_2 = cv2.imread(FRAME_2_PATH.as_posix())
 
         # Create some fake annotations for those frames also.
-        annotations_1 = faker.labeled_data(max_frame=0).shapes
-        annotations_2 = faker.labeled_data(max_frame=0).shapes
+        annotations = faker.labeled_data(max_frame=0).shapes
 
         # Mock the task so that it reads real frames.
         mock_task = mocker.Mock(spec=Task)
         mock_task.get_image.side_effect = [frame_1, frame_2]
 
         mock_job = mocker.Mock(spec=Job)
-        mock_job.annotations_for_frame.side_effect = [
-            annotations_1,
-            annotations_2,
-        ]
-        mock_task.get_jobs.return_value = [mock_job]
+        mock_job.annotations_for_frame.return_value = annotations
+        mock_task.jobs = [mock_job]
 
         # Create the tracker.
         _tracker = tracker.Tracker(mock_task)
 
         # Act.
-        updated_annotations = _tracker.track_forward()
+        _tracker.track_forward()
 
         # Assert.
         # Serialize the new annotation points.
-        annotation_points = [a.points for a in updated_annotations]
+        args = [a for a, _ in mock_job.update_annotations.call_args_list]
+        annotation_points = [a.points for a in args[0]]
         serial_points = yaml.dump(annotation_points, Dumper=yaml.Dumper)
 
         snapshot.assert_match(serial_points, "annotation_points.yaml")
