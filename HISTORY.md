@@ -45,3 +45,7 @@
 - Completely rewrite the CVAT connector layer.
 - No longer uses the CVAT CLI and `datamuro` internally.
 - Connects directly to CVAT using swagger-generated client.
+
+### v0.7.1 (2021-03-09)
+
+- Allow newer kedro versions.
