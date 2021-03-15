@@ -49,3 +49,7 @@
 ### v0.7.1 (2021-03-09)
 
 - Allow newer kedro versions.
+
+### v0.7.2 (2021-03-14)
+
+- Make Pillow dependency less restrictive.
