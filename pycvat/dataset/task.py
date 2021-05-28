@@ -8,11 +8,11 @@ from typing import Any, Dict, Iterable, List, Tuple
 
 import cv2
 import numpy as np
-from cvat_api import ApiClient, ClientFile, Data, DataMeta, Label
-from cvat_api import Task as TaskModel
-from cvat_api import TasksApi
 from loguru import logger
 from methodtools import lru_cache
+from swagger_client import ApiClient, ClientFile, Data, DataMeta, Label
+from swagger_client import Task as TaskModel
+from swagger_client import TasksApi
 
 from .clearable_cached_property import ClearableCachedProperty
 from .cvat_connector import CvatConnector

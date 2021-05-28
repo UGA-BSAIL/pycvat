@@ -17,7 +17,7 @@ opencv-contrib-python = "^4.4.0"
 pydantic = "^1.6.1"
 kedro = ">=0.16.4"
 "backports.cached-property" = "^1.0.0"
-cvat-api = {git = "git@github.com:UGA-BSAIL/cvat_api.git", tag = "v1.1.0"}
+swagger-client = { path = "python-client", develop = false }
 singledispatchmethod = "^1.0"
 
 [tool.poetry.dev-dependencies]
@@ -43,7 +43,7 @@ exclude = '''
     | \.venv
     | build
     | dist
-    | cvat
+    | python-client
   )/
 )
 '''
@@ -51,7 +51,7 @@ exclude = '''
 [tool.isort]
 profile = "black"
 line_length = 79
-skip = "('.eggs', '.git', '.venv', 'build', 'dist', 'cvat')"
+skip = "('.eggs', '.git', '.venv', 'build', 'dist', 'python-client')"
 
 [build-system]
 requires = ["poetry>=0.12"]

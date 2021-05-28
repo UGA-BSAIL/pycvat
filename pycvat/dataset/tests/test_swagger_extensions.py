@@ -8,10 +8,10 @@ from functools import partial
 from pathlib import Path
 
 import pytest
-from cvat_api import ApiClient, Configuration, Data
 from faker import Faker
 from pydantic.dataclasses import dataclass
 from pytest_mock import MockFixture
+from swagger_client import ApiClient, Configuration, Data
 
 from pycvat.dataset import swagger_extensions
 from pycvat.type_helpers import ArbitraryTypesConfig

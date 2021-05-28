@@ -7,7 +7,7 @@ import abc
 from contextlib import contextmanager
 from typing import Any, ContextManager
 
-from cvat_api import ApiClient
+from swagger_client import ApiClient
 
 
 class CvatConnector(abc.ABC):

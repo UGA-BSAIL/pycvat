@@ -5,7 +5,7 @@ Miscellaneous type aliases.
 
 from typing import Union
 
-from cvat_api import LabeledImage, LabeledShape, LabeledTrack
+from swagger_client import LabeledImage, LabeledShape, LabeledTrack
 
 
 class ArbitraryTypesConfig:

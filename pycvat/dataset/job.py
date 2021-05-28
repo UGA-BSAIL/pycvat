@@ -1,16 +1,16 @@
 import itertools
 from typing import Any, Dict, Iterable, List, Optional
 
-from cvat_api import Job as JobModel
-from cvat_api import (
+from loguru import logger
+from singledispatchmethod import singledispatchmethod
+from swagger_client import Job as JobModel
+from swagger_client import (
     JobsApi,
     LabeledData,
     LabeledImage,
     LabeledShape,
     LabeledTrack,
 )
-from loguru import logger
-from singledispatchmethod import singledispatchmethod
 
 from ..type_helpers import LabeledObject
 from .clearable_cached_property import ClearableCachedProperty

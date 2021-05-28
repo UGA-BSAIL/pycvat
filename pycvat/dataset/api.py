@@ -3,7 +3,7 @@ Tools for communicating with the CVAT API.
 """
 
 
-from cvat_api import ApiClient, Configuration
+from swagger_client import ApiClient, Configuration
 
 
 def make_api_client(
@@ -25,5 +25,7 @@ def make_api_client(
     config.username = user
     config.password = password
     config.host = host
+    # Some client-side validation features are broken in CVAT.
+    config.client_side_validation = False
 
     return ApiClient(config)

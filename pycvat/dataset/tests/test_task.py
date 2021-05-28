@@ -8,11 +8,11 @@ from pathlib import Path
 from typing import List
 
 import pytest
-from cvat_api import ApiClient, Label, Segment, SimpleJob
-from cvat_api import Task as TaskModel
 from faker import Faker
 from pydantic.dataclasses import dataclass
 from pytest_mock import MockFixture
+from swagger_client import ApiClient, Label, Segment, SimpleJob
+from swagger_client import Task as TaskModel
 
 from pycvat.dataset import task
 from pycvat.type_helpers import ArbitraryTypesConfig

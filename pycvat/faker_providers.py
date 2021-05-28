@@ -8,7 +8,9 @@ from functools import partial
 from pathlib import Path
 from typing import Any, List, Optional, Tuple
 
-from cvat_api import (
+from faker import Faker
+from faker.providers import BaseProvider
+from swagger_client import (
     ClientFile,
     FrameMeta,
     Job,
@@ -20,8 +22,6 @@ from cvat_api import (
     SimpleJob,
     TrackedShape,
 )
-from faker import Faker
-from faker.providers import BaseProvider
 
 from pycvat.type_helpers import LabeledObject
 

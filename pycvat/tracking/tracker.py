@@ -8,8 +8,8 @@ from typing import List, Tuple
 
 import cv2
 import numpy as np
-from cvat_api import LabeledShape
 from loguru import logger
+from swagger_client import LabeledShape
 
 from ..dataset.task import Task
 

@@ -6,9 +6,9 @@ Tests for the `cvat_connector` module.
 from typing import Any
 
 import pytest
-from cvat_api import ApiClient
 from pydantic.dataclasses import dataclass
 from pytest_mock import MockFixture
+from swagger_client import ApiClient
 
 from pycvat.dataset import cvat_connector
 from pycvat.type_helpers import ArbitraryTypesConfig

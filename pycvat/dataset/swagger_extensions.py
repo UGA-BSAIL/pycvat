@@ -8,8 +8,7 @@ from typing import Any
 
 import requests
 from requests.auth import HTTPBasicAuth
-
-from cvat_api import Data, TasksApi
+from swagger_client import Data, TasksApi
 
 
 class ExtendedTasksApi(TasksApi):

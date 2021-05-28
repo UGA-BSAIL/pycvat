@@ -7,10 +7,10 @@ import enum
 import unittest.mock as mock
 
 import pytest
-from cvat_api import ApiClient
 from faker import Faker
 from pydantic.dataclasses import dataclass
 from pytest_mock import MockFixture
+from swagger_client import ApiClient
 
 from pycvat.dataset import job
 from pycvat.type_helpers import ArbitraryTypesConfig
