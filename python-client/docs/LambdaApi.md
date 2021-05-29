@@ -11,11 +11,8 @@ Method | HTTP request | Description
 [**lambda_requests_list**](LambdaApi.md#lambda_requests_list) | **GET** /lambda/requests |
 [**lambda_requests_read**](LambdaApi.md#lambda_requests_read) | **GET** /lambda/requests/{id} |
 
-
 # **lambda_functions_create**
 > lambda_functions_create(func_id)
-
-
 
 
 
@@ -26,7 +23,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -58,15 +54,13 @@ void (empty response body)
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **lambda_functions_list**
 > lambda_functions_list()
-
-
 
 
 
@@ -77,7 +71,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -105,15 +98,13 @@ void (empty response body)
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **lambda_functions_read**
 > lambda_functions_read(func_id)
-
-
 
 
 
@@ -124,7 +115,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -156,15 +146,13 @@ void (empty response body)
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **lambda_requests_create**
 > lambda_requests_create()
-
-
 
 
 
@@ -175,7 +163,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -203,15 +190,13 @@ void (empty response body)
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **lambda_requests_list**
 > lambda_requests_list()
-
-
 
 
 
@@ -222,7 +207,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -250,15 +234,13 @@ void (empty response body)
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **lambda_requests_read**
 > lambda_requests_read(id)
-
-
 
 
 
@@ -269,7 +251,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -301,7 +282,7 @@ void (empty response body)
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

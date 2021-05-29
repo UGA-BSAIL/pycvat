@@ -916,10 +916,10 @@ python-versions = "*"
 develop = false
 
 [package.dependencies]
-certifi = ">=2017.4.17"
-python-dateutil = ">=2.1"
+certifi = "*"
+python-dateutil = "*"
 six = ">=1.10"
-urllib3 = ">=1.23"
+urllib3 = ">=1.15"
 
 [package.source]
 type = "directory"

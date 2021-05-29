@@ -7,13 +7,10 @@ Method | HTTP request | Description
 [**reviews_create**](ReviewsApi.md#reviews_create) | **POST** /reviews | Submit a review for a job
 [**reviews_delete**](ReviewsApi.md#reviews_delete) | **DELETE** /reviews/{id} | Method removes a review from a job
 
-
 # **reviews_create**
-> CombinedReview reviews_create(data)
+> CombinedReview reviews_create(body)
 
 Submit a review for a job
-
-
 
 ### Example
 ```python
@@ -22,7 +19,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -30,11 +26,11 @@ configuration.password = 'YOUR_PASSWORD'
 
 # create an instance of the API class
 api_instance = swagger_client.ReviewsApi(swagger_client.ApiClient(configuration))
-data = swagger_client.CombinedReview() # CombinedReview |
+body = swagger_client.CombinedReview() # CombinedReview |
 
 try:
     # Submit a review for a job
-    api_response = api_instance.reviews_create(data)
+    api_response = api_instance.reviews_create(body)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling ReviewsApi->reviews_create: %s\n" % e)
@@ -44,7 +40,7 @@ except ApiException as e:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **data** | [**CombinedReview**](CombinedReview.md)|  |
+ **body** | [**CombinedReview**](CombinedReview.md)|  |
 
 ### Return type
 
@@ -66,8 +62,6 @@ Name | Type | Description  | Notes
 
 Method removes a review from a job
 
-
-
 ### Example
 ```python
 from __future__ import print_function
@@ -75,7 +69,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -108,7 +101,7 @@ void (empty response body)
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

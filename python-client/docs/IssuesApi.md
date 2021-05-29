@@ -8,13 +8,10 @@ Method | HTTP request | Description
 [**issues_delete**](IssuesApi.md#issues_delete) | **DELETE** /issues/{id} | Method removes an issue from a job
 [**issues_partial_update**](IssuesApi.md#issues_partial_update) | **PATCH** /issues/{id} | Method updates an issue. It is used to resolve/reopen an issue
 
-
 # **issues_comments**
 > list[Comment] issues_comments(id)
 
 The action returns all comments of a specific issue
-
-
 
 ### Example
 ```python
@@ -23,7 +20,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -57,7 +53,7 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
@@ -67,8 +63,6 @@ Name | Type | Description  | Notes
 
 Method removes an issue from a job
 
-
-
 ### Example
 ```python
 from __future__ import print_function
@@ -76,7 +70,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -109,17 +102,15 @@ void (empty response body)
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **issues_partial_update**
-> Issue issues_partial_update(id, data)
+> Issue issues_partial_update(body, id)
 
 Method updates an issue. It is used to resolve/reopen an issue
-
-
 
 ### Example
 ```python
@@ -128,7 +119,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -136,12 +126,12 @@ configuration.password = 'YOUR_PASSWORD'
 
 # create an instance of the API class
 api_instance = swagger_client.IssuesApi(swagger_client.ApiClient(configuration))
+body = swagger_client.Issue() # Issue |
 id = 56 # int | A unique integer value identifying this issue.
-data = swagger_client.Issue() # Issue |
 
 try:
     # Method updates an issue. It is used to resolve/reopen an issue
-    api_response = api_instance.issues_partial_update(id, data)
+    api_response = api_instance.issues_partial_update(body, id)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling IssuesApi->issues_partial_update: %s\n" % e)
@@ -151,8 +141,8 @@ except ApiException as e:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **body** | [**Issue**](Issue.md)|  |
  **id** | **int**| A unique integer value identifying this issue. |
- **data** | [**Issue**](Issue.md)|  |
 
 ### Return type
 

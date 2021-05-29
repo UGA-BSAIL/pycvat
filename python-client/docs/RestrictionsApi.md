@@ -7,11 +7,8 @@ Method | HTTP request | Description
 [**restrictions_terms_of_use**](RestrictionsApi.md#restrictions_terms_of_use) | **GET** /restrictions/terms-of-use |
 [**restrictions_user_agreements**](RestrictionsApi.md#restrictions_user_agreements) | **GET** /restrictions/user-agreements | Method provides user agreements that the user must accept to register
 
-
 # **restrictions_terms_of_use**
 > restrictions_terms_of_use()
-
-
 
 
 
@@ -22,7 +19,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -50,7 +46,7 @@ void (empty response body)
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
+ - **Content-Type**: Not defined
  - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
@@ -60,8 +56,6 @@ void (empty response body)
 
 Method provides user agreements that the user must accept to register
 
-
-
 ### Example
 ```python
 from __future__ import print_function
@@ -69,7 +63,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -99,7 +92,7 @@ This endpoint does not need any parameter.
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

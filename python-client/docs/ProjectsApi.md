@@ -11,13 +11,10 @@ Method | HTTP request | Description
 [**projects_read**](ProjectsApi.md#projects_read) | **GET** /projects/{id} | Method returns details of a specific project
 [**projects_tasks**](ProjectsApi.md#projects_tasks) | **GET** /projects/{id}/tasks | Returns information of the tasks of the project with the selected id
 
-
 # **projects_create**
-> Project projects_create(data)
+> Project projects_create(body)
 
 Method creates a new project
-
-
 
 ### Example
 ```python
@@ -26,7 +23,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -34,11 +30,11 @@ configuration.password = 'YOUR_PASSWORD'
 
 # create an instance of the API class
 api_instance = swagger_client.ProjectsApi(swagger_client.ApiClient(configuration))
-data = swagger_client.Project() # Project |
+body = swagger_client.Project() # Project |
 
 try:
     # Method creates a new project
-    api_response = api_instance.projects_create(data)
+    api_response = api_instance.projects_create(body)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling ProjectsApi->projects_create: %s\n" % e)
@@ -48,7 +44,7 @@ except ApiException as e:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **data** | [**Project**](Project.md)|  |
+ **body** | [**Project**](Project.md)|  |
 
 ### Return type
 
@@ -70,8 +66,6 @@ Name | Type | Description  | Notes
 
 Method deletes a specific project
 
-
-
 ### Example
 ```python
 from __future__ import print_function
@@ -79,7 +73,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -112,17 +105,15 @@ void (empty response body)
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **projects_list**
-> object projects_list(search=search, id=id, name=name, owner=owner, status=status, ordering=ordering, page=page, page_size=page_size)
+> InlineResponse200 projects_list(search=search, id=id, name=name, owner=owner, status=status, ordering=ordering, page=page, page_size=page_size)
 
 Returns a paginated list of projects according to query parameters (12 projects per page)
-
-
 
 ### Example
 ```python
@@ -131,7 +122,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -140,7 +130,7 @@ configuration.password = 'YOUR_PASSWORD'
 # create an instance of the API class
 api_instance = swagger_client.ProjectsApi(swagger_client.ApiClient(configuration))
 search = 'search_example' # str | A search term. (optional)
-id = 8.14 # float | A unique number value identifying this project (optional)
+id = 1.2 # float | A unique number value identifying this project (optional)
 name = 'name_example' # str | Find all projects where name contains a parameter value (optional)
 owner = 'owner_example' # str | Find all project where owner name contains a parameter value (optional)
 status = 'status_example' # str | Find all projects with a specific status (optional)
@@ -171,7 +161,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**object**
+[**InlineResponse200**](InlineResponse200.md)
 
 ### Authorization
 
@@ -179,17 +169,15 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **projects_partial_update**
-> Project projects_partial_update(id, data)
+> Project projects_partial_update(body, id)
 
 Methods does a partial update of chosen fields in a project
-
-
 
 ### Example
 ```python
@@ -198,7 +186,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -206,12 +193,12 @@ configuration.password = 'YOUR_PASSWORD'
 
 # create an instance of the API class
 api_instance = swagger_client.ProjectsApi(swagger_client.ApiClient(configuration))
+body = swagger_client.Project() # Project |
 id = 56 # int | A unique integer value identifying this project.
-data = swagger_client.Project() # Project |
 
 try:
     # Methods does a partial update of chosen fields in a project
-    api_response = api_instance.projects_partial_update(id, data)
+    api_response = api_instance.projects_partial_update(body, id)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling ProjectsApi->projects_partial_update: %s\n" % e)
@@ -221,8 +208,8 @@ except ApiException as e:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **body** | [**Project**](Project.md)|  |
  **id** | **int**| A unique integer value identifying this project. |
- **data** | [**Project**](Project.md)|  |
 
 ### Return type
 
@@ -244,8 +231,6 @@ Name | Type | Description  | Notes
 
 Method returns details of a specific project
 
-
-
 ### Example
 ```python
 from __future__ import print_function
@@ -253,7 +238,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -287,7 +271,7 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
@@ -297,8 +281,6 @@ Name | Type | Description  | Notes
 
 Returns information of the tasks of the project with the selected id
 
-
-
 ### Example
 ```python
 from __future__ import print_function
@@ -306,7 +288,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -340,7 +321,7 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

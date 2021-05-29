@@ -14,13 +14,10 @@ Method | HTTP request | Description
 [**jobs_reviews**](JobsApi.md#jobs_reviews) | **GET** /jobs/{id}/reviews | Method returns list of reviews for the job
 [**jobs_update**](JobsApi.md#jobs_update) | **PUT** /jobs/{id} | Method updates a job by id
 
-
 # **jobs_annotations_delete**
 > jobs_annotations_delete(id)
 
 Method deletes all annotations for a specific job
-
-
 
 ### Example
 ```python
@@ -29,7 +26,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -62,17 +58,15 @@ void (empty response body)
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **jobs_annotations_partial_update**
-> LabeledData jobs_annotations_partial_update(id, data, action)
+> LabeledData jobs_annotations_partial_update(body, action, id)
 
 Method performs a partial update of annotations in a specific job
-
-
 
 ### Example
 ```python
@@ -81,7 +75,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -89,13 +82,13 @@ configuration.password = 'YOUR_PASSWORD'
 
 # create an instance of the API class
 api_instance = swagger_client.JobsApi(swagger_client.ApiClient(configuration))
-id = 56 # int | A unique integer value identifying this job.
-data = swagger_client.LabeledData() # LabeledData |
+body = swagger_client.LabeledData() # LabeledData |
 action = 'action_example' # str |
+id = 56 # int | A unique integer value identifying this job.
 
 try:
     # Method performs a partial update of annotations in a specific job
-    api_response = api_instance.jobs_annotations_partial_update(id, data, action)
+    api_response = api_instance.jobs_annotations_partial_update(body, action, id)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling JobsApi->jobs_annotations_partial_update: %s\n" % e)
@@ -105,9 +98,9 @@ except ApiException as e:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **id** | **int**| A unique integer value identifying this job. |
- **data** | [**LabeledData**](LabeledData.md)|  |
+ **body** | [**LabeledData**](LabeledData.md)|  |
  **action** | **str**|  |
+ **id** | **int**| A unique integer value identifying this job. |
 
 ### Return type
 
@@ -129,8 +122,6 @@ Name | Type | Description  | Notes
 
 Method returns annotations for a specific job
 
-
-
 ### Example
 ```python
 from __future__ import print_function
@@ -138,7 +129,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -172,17 +162,15 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **jobs_annotations_update**
-> LabeledData jobs_annotations_update(id, data)
+> LabeledData jobs_annotations_update(body, id)
 
 Method performs an update of all annotations in a specific job
-
-
 
 ### Example
 ```python
@@ -191,7 +179,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -199,12 +186,12 @@ configuration.password = 'YOUR_PASSWORD'
 
 # create an instance of the API class
 api_instance = swagger_client.JobsApi(swagger_client.ApiClient(configuration))
+body = swagger_client.LabeledData() # LabeledData |
 id = 56 # int | A unique integer value identifying this job.
-data = swagger_client.LabeledData() # LabeledData |
 
 try:
     # Method performs an update of all annotations in a specific job
-    api_response = api_instance.jobs_annotations_update(id, data)
+    api_response = api_instance.jobs_annotations_update(body, id)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling JobsApi->jobs_annotations_update: %s\n" % e)
@@ -214,8 +201,8 @@ except ApiException as e:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **body** | [**LabeledData**](LabeledData.md)|  |
  **id** | **int**| A unique integer value identifying this job. |
- **data** | [**LabeledData**](LabeledData.md)|  |
 
 ### Return type
 
@@ -237,8 +224,6 @@ Name | Type | Description  | Notes
 
 Method returns list of issues for the job
 
-
-
 ### Example
 ```python
 from __future__ import print_function
@@ -246,7 +231,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -280,17 +264,15 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **jobs_partial_update**
-> Job jobs_partial_update(id, data)
+> Job jobs_partial_update(body, id)
 
 Methods does a partial update of chosen fields in a job
-
-
 
 ### Example
 ```python
@@ -299,7 +281,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -307,12 +288,12 @@ configuration.password = 'YOUR_PASSWORD'
 
 # create an instance of the API class
 api_instance = swagger_client.JobsApi(swagger_client.ApiClient(configuration))
+body = swagger_client.Job() # Job |
 id = 56 # int | A unique integer value identifying this job.
-data = swagger_client.Job() # Job |
 
 try:
     # Methods does a partial update of chosen fields in a job
-    api_response = api_instance.jobs_partial_update(id, data)
+    api_response = api_instance.jobs_partial_update(body, id)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling JobsApi->jobs_partial_update: %s\n" % e)
@@ -322,8 +303,8 @@ except ApiException as e:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **body** | [**Job**](Job.md)|  |
  **id** | **int**| A unique integer value identifying this job. |
- **data** | [**Job**](Job.md)|  |
 
 ### Return type
 
@@ -345,8 +326,6 @@ Name | Type | Description  | Notes
 
 Method returns details of a job
 
-
-
 ### Example
 ```python
 from __future__ import print_function
@@ -354,7 +333,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -388,7 +366,7 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
@@ -398,8 +376,6 @@ Name | Type | Description  | Notes
 
 Method returns list of reviews for the job
 
-
-
 ### Example
 ```python
 from __future__ import print_function
@@ -407,7 +383,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -441,17 +416,15 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **jobs_update**
-> Job jobs_update(id, data)
+> Job jobs_update(body, id)
 
 Method updates a job by id
-
-
 
 ### Example
 ```python
@@ -460,7 +433,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -468,12 +440,12 @@ configuration.password = 'YOUR_PASSWORD'
 
 # create an instance of the API class
 api_instance = swagger_client.JobsApi(swagger_client.ApiClient(configuration))
+body = swagger_client.Job() # Job |
 id = 56 # int | A unique integer value identifying this job.
-data = swagger_client.Job() # Job |
 
 try:
     # Method updates a job by id
-    api_response = api_instance.jobs_update(id, data)
+    api_response = api_instance.jobs_update(body, id)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling JobsApi->jobs_update: %s\n" % e)
@@ -483,8 +455,8 @@ except ApiException as e:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **body** | [**Job**](Job.md)|  |
  **id** | **int**| A unique integer value identifying this job. |
- **data** | [**Job**](Job.md)|  |
 
 ### Return type
 

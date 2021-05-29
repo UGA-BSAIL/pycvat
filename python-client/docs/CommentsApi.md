@@ -8,11 +8,8 @@ Method | HTTP request | Description
 [**comments_delete**](CommentsApi.md#comments_delete) | **DELETE** /comments/{id} | Method removes a comment from an issue
 [**comments_partial_update**](CommentsApi.md#comments_partial_update) | **PATCH** /comments/{id} | Method updates comment in an issue
 
-
 # **comments_create**
-> Comment comments_create(data)
-
-
+> Comment comments_create(body)
 
 
 
@@ -23,7 +20,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -31,10 +27,10 @@ configuration.password = 'YOUR_PASSWORD'
 
 # create an instance of the API class
 api_instance = swagger_client.CommentsApi(swagger_client.ApiClient(configuration))
-data = swagger_client.Comment() # Comment |
+body = swagger_client.Comment() # Comment |
 
 try:
-    api_response = api_instance.comments_create(data)
+    api_response = api_instance.comments_create(body)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling CommentsApi->comments_create: %s\n" % e)
@@ -44,7 +40,7 @@ except ApiException as e:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **data** | [**Comment**](Comment.md)|  |
+ **body** | [**Comment**](Comment.md)|  |
 
 ### Return type
 
@@ -66,8 +62,6 @@ Name | Type | Description  | Notes
 
 Method removes a comment from an issue
 
-
-
 ### Example
 ```python
 from __future__ import print_function
@@ -75,7 +69,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -108,17 +101,15 @@ void (empty response body)
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **comments_partial_update**
-> Comment comments_partial_update(id, data)
+> Comment comments_partial_update(body, id)
 
 Method updates comment in an issue
-
-
 
 ### Example
 ```python
@@ -127,7 +118,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -135,12 +125,12 @@ configuration.password = 'YOUR_PASSWORD'
 
 # create an instance of the API class
 api_instance = swagger_client.CommentsApi(swagger_client.ApiClient(configuration))
+body = swagger_client.Comment() # Comment |
 id = 56 # int | A unique integer value identifying this comment.
-data = swagger_client.Comment() # Comment |
 
 try:
     # Method updates comment in an issue
-    api_response = api_instance.comments_partial_update(id, data)
+    api_response = api_instance.comments_partial_update(body, id)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling CommentsApi->comments_partial_update: %s\n" % e)
@@ -150,8 +140,8 @@ except ApiException as e:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **body** | [**Comment**](Comment.md)|  |
  **id** | **int**| A unique integer value identifying this comment. |
- **data** | [**Comment**](Comment.md)|  |
 
 ### Return type
 

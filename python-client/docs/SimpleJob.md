@@ -5,8 +5,8 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **url** | **str** |  | [optional]
 **id** | **int** |  | [optional]
-**assignee** | [**BasicUser**](BasicUser.md) |  |
-**assignee_id** | **int** |  |
+**assignee** | [**BasicUser**](BasicUser.md) |  | [optional]
+**assignee_id** | **int** |  | [optional]
 **reviewer** | [**BasicUser**](BasicUser.md) |  | [optional]
 **reviewer_id** | **int** |  | [optional]
 **status** | **str** |  | [optional]

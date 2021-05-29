@@ -11,13 +11,10 @@ Method | HTTP request | Description
 [**server_plugins**](ServerApi.md#server_plugins) | **GET** /server/plugins | Method provides allowed plugins.
 [**server_share**](ServerApi.md#server_share) | **GET** /server/share | Returns all files and folders that are on the server along specified path
 
-
 # **server_about**
 > About server_about()
 
 Method provides basic CVAT information
-
-
 
 ### Example
 ```python
@@ -26,7 +23,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -56,7 +52,7 @@ This endpoint does not need any parameter.
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
@@ -66,8 +62,6 @@ This endpoint does not need any parameter.
 
 Method provides the list of supported annotations formats
 
-
-
 ### Example
 ```python
 from __future__ import print_function
@@ -75,7 +69,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -105,13 +98,13 @@ This endpoint does not need any parameter.
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **server_exception**
-> Exception server_exception(data)
+> Exception server_exception(body)
 
 Saves an exception from a client on the server
 
@@ -124,7 +117,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -132,11 +124,11 @@ configuration.password = 'YOUR_PASSWORD'
 
 # create an instance of the API class
 api_instance = swagger_client.ServerApi(swagger_client.ApiClient(configuration))
-data = swagger_client.Exception() # Exception |
+body = swagger_client.Exception() # Exception |
 
 try:
     # Saves an exception from a client on the server
-    api_response = api_instance.server_exception(data)
+    api_response = api_instance.server_exception(body)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling ServerApi->server_exception: %s\n" % e)
@@ -146,7 +138,7 @@ except ApiException as e:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **data** | [**Exception**](Exception.md)|  |
+ **body** | [**Exception**](Exception.md)|  |
 
 ### Return type
 
@@ -164,7 +156,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **server_logs**
-> list[LogEvent] server_logs(data)
+> list[LogEvent] server_logs(body)
 
 Saves logs from a client on the server
 
@@ -177,7 +169,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -185,11 +176,11 @@ configuration.password = 'YOUR_PASSWORD'
 
 # create an instance of the API class
 api_instance = swagger_client.ServerApi(swagger_client.ApiClient(configuration))
-data = [swagger_client.LogEvent()] # list[LogEvent] |
+body = [swagger_client.LogEvent()] # list[LogEvent] |
 
 try:
     # Saves logs from a client on the server
-    api_response = api_instance.server_logs(data)
+    api_response = api_instance.server_logs(body)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling ServerApi->server_logs: %s\n" % e)
@@ -199,7 +190,7 @@ except ApiException as e:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **data** | [**list[LogEvent]**](LogEvent.md)|  |
+ **body** | [**list[LogEvent]**](LogEvent.md)|  |
 
 ### Return type
 
@@ -221,8 +212,6 @@ Name | Type | Description  | Notes
 
 Method provides allowed plugins.
 
-
-
 ### Example
 ```python
 from __future__ import print_function
@@ -230,7 +219,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -260,7 +248,7 @@ This endpoint does not need any parameter.
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
@@ -270,8 +258,6 @@ This endpoint does not need any parameter.
 
 Returns all files and folders that are on the server along specified path
 
-
-
 ### Example
 ```python
 from __future__ import print_function
@@ -279,7 +265,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -313,7 +298,7 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

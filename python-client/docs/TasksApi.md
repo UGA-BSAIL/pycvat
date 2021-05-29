@@ -21,13 +21,10 @@ Method | HTTP request | Description
 [**tasks_status**](TasksApi.md#tasks_status) | **GET** /tasks/{id}/status | When task is being created the method returns information about a status of the creation process
 [**tasks_update**](TasksApi.md#tasks_update) | **PUT** /tasks/{id} | Method updates a task by id
 
-
 # **tasks_annotations_delete**
 > tasks_annotations_delete(id)
 
 Method deletes all annotations for a specific task
-
-
 
 ### Example
 ```python
@@ -36,7 +33,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -69,17 +65,15 @@ void (empty response body)
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **tasks_annotations_partial_update**
-> LabeledData tasks_annotations_partial_update(id, data, action)
+> LabeledData tasks_annotations_partial_update(body, action, id)
 
 Method performs a partial update of annotations in a specific task
-
-
 
 ### Example
 ```python
@@ -88,7 +82,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -96,13 +89,13 @@ configuration.password = 'YOUR_PASSWORD'
 
 # create an instance of the API class
 api_instance = swagger_client.TasksApi(swagger_client.ApiClient(configuration))
-id = 56 # int | A unique integer value identifying this task.
-data = swagger_client.LabeledData() # LabeledData |
+body = swagger_client.LabeledData() # LabeledData |
 action = 'action_example' # str |
+id = 56 # int | A unique integer value identifying this task.
 
 try:
     # Method performs a partial update of annotations in a specific task
-    api_response = api_instance.tasks_annotations_partial_update(id, data, action)
+    api_response = api_instance.tasks_annotations_partial_update(body, action, id)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling TasksApi->tasks_annotations_partial_update: %s\n" % e)
@@ -112,9 +105,9 @@ except ApiException as e:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **id** | **int**| A unique integer value identifying this task. |
- **data** | [**LabeledData**](LabeledData.md)|  |
+ **body** | [**LabeledData**](LabeledData.md)|  |
  **action** | **str**|  |
+ **id** | **int**| A unique integer value identifying this task. |
 
 ### Return type
 
@@ -136,8 +129,6 @@ Name | Type | Description  | Notes
 
 Method allows to download task annotations
 
-
-
 ### Example
 ```python
 from __future__ import print_function
@@ -145,7 +136,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -184,17 +174,15 @@ void (empty response body)
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **tasks_annotations_update**
-> tasks_annotations_update(id, data, format=format)
+> tasks_annotations_update(body, id, format=format)
 
 Method allows to upload task annotations
-
-
 
 ### Example
 ```python
@@ -203,7 +191,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -211,13 +198,13 @@ configuration.password = 'YOUR_PASSWORD'
 
 # create an instance of the API class
 api_instance = swagger_client.TasksApi(swagger_client.ApiClient(configuration))
+body = swagger_client.LabeledData() # LabeledData |
 id = 56 # int | A unique integer value identifying this task.
-data = swagger_client.LabeledData() # LabeledData |
 format = 'format_example' # str | Input format name You can get the list of supported formats at: /server/annotation/formats (optional)
 
 try:
     # Method allows to upload task annotations
-    api_instance.tasks_annotations_update(id, data, format=format)
+    api_instance.tasks_annotations_update(body, id, format=format)
 except ApiException as e:
     print("Exception when calling TasksApi->tasks_annotations_update: %s\n" % e)
 ```
@@ -226,8 +213,8 @@ except ApiException as e:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **body** | [**LabeledData**](LabeledData.md)|  |
  **id** | **int**| A unique integer value identifying this task. |
- **data** | [**LabeledData**](LabeledData.md)|  |
  **format** | **str**| Input format name You can get the list of supported formats at: /server/annotation/formats | [optional]
 
 ### Return type
@@ -241,16 +228,14 @@ void (empty response body)
 ### HTTP request headers
 
  - **Content-Type**: application/json
- - **Accept**: application/json
+ - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **tasks_create**
-> Task tasks_create(data)
+> Task tasks_create(body)
 
 Method creates a new task in a database without any attached images and videos
-
-
 
 ### Example
 ```python
@@ -259,7 +244,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -267,11 +251,11 @@ configuration.password = 'YOUR_PASSWORD'
 
 # create an instance of the API class
 api_instance = swagger_client.TasksApi(swagger_client.ApiClient(configuration))
-data = swagger_client.Task() # Task |
+body = swagger_client.Task() # Task |
 
 try:
     # Method creates a new task in a database without any attached images and videos
-    api_response = api_instance.tasks_create(data)
+    api_response = api_instance.tasks_create(body)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling TasksApi->tasks_create: %s\n" % e)
@@ -281,7 +265,7 @@ except ApiException as e:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **data** | [**Task**](Task.md)|  |
+ **body** | [**Task**](Task.md)|  |
 
 ### Return type
 
@@ -299,11 +283,9 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **tasks_data_create**
-> Data tasks_data_create(id, data)
+> Data tasks_data_create(body, id)
 
 Method permanently attaches images or video to a task
-
-
 
 ### Example
 ```python
@@ -312,7 +294,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -320,12 +301,12 @@ configuration.password = 'YOUR_PASSWORD'
 
 # create an instance of the API class
 api_instance = swagger_client.TasksApi(swagger_client.ApiClient(configuration))
+body = swagger_client.Data() # Data |
 id = 56 # int | A unique integer value identifying this task.
-data = swagger_client.Data() # Data |
 
 try:
     # Method permanently attaches images or video to a task
-    api_response = api_instance.tasks_data_create(id, data)
+    api_response = api_instance.tasks_data_create(body, id)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling TasksApi->tasks_data_create: %s\n" % e)
@@ -335,8 +316,8 @@ except ApiException as e:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **body** | [**Data**](Data.md)|  |
  **id** | **int**| A unique integer value identifying this task. |
- **data** | [**Data**](Data.md)|  |
 
 ### Return type
 
@@ -358,8 +339,6 @@ Name | Type | Description  | Notes
 
 Method provides a meta information about media files which are related with the task
 
-
-
 ### Example
 ```python
 from __future__ import print_function
@@ -367,7 +346,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -401,7 +379,7 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
@@ -411,8 +389,6 @@ Name | Type | Description  | Notes
 
 Method returns data for a specific task
 
-
-
 ### Example
 ```python
 from __future__ import print_function
@@ -420,7 +396,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -431,7 +406,7 @@ api_instance = swagger_client.TasksApi(swagger_client.ApiClient(configuration))
 id = 56 # int | A unique integer value identifying this task.
 type = 'type_example' # str | Specifies the type of the requested data
 quality = 'quality_example' # str | Specifies the quality level of the requested data, doesn't matter for 'preview' type
-number = 8.14 # float | A unique number value identifying chunk or frame, doesn't matter for 'preview' type
+number = 1.2 # float | A unique number value identifying chunk or frame, doesn't matter for 'preview' type
 
 try:
     # Method returns data for a specific task
@@ -447,8 +422,8 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **id** | **int**| A unique integer value identifying this task. |
  **type** | **str**| Specifies the type of the requested data |
- **quality** | **str**| Specifies the quality level of the requested data, doesn&#39;t matter for &#39;preview&#39; type |
- **number** | **float**| A unique number value identifying chunk or frame, doesn&#39;t matter for &#39;preview&#39; type |
+ **quality** | **str**| Specifies the quality level of the requested data, doesn&#x27;t matter for &#x27;preview&#x27; type |
+ **number** | **float**| A unique number value identifying chunk or frame, doesn&#x27;t matter for &#x27;preview&#x27; type |
 
 ### Return type
 
@@ -460,7 +435,7 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
@@ -470,8 +445,6 @@ Name | Type | Description  | Notes
 
 Export task as a dataset in a specific format
 
-
-
 ### Example
 ```python
 from __future__ import print_function
@@ -479,7 +452,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -518,8 +490,8 @@ void (empty response body)
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -528,8 +500,6 @@ void (empty response body)
 
 Method deletes a specific task, all attached jobs, annotations, and data
 
-
-
 ### Example
 ```python
 from __future__ import print_function
@@ -537,7 +507,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -570,8 +539,8 @@ void (empty response body)
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -580,8 +549,6 @@ void (empty response body)
 
 Returns a list of jobs for a specific task
 
-
-
 ### Example
 ```python
 from __future__ import print_function
@@ -589,7 +556,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -623,17 +589,15 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **tasks_list**
-> object tasks_list(search=search, id=id, name=name, owner=owner, mode=mode, status=status, assignee=assignee, ordering=ordering, page=page, page_size=page_size)
+> InlineResponse2001 tasks_list(search=search, id=id, name=name, owner=owner, mode=mode, status=status, assignee=assignee, ordering=ordering, page=page, page_size=page_size)
 
 Returns a paginated list of tasks according to query parameters (10 tasks per page)
-
-
 
 ### Example
 ```python
@@ -642,7 +606,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -651,7 +614,7 @@ configuration.password = 'YOUR_PASSWORD'
 # create an instance of the API class
 api_instance = swagger_client.TasksApi(swagger_client.ApiClient(configuration))
 search = 'search_example' # str | A search term. (optional)
-id = 8.14 # float | A unique number value identifying this task (optional)
+id = 1.2 # float | A unique number value identifying this task (optional)
 name = 'name_example' # str | Find all tasks where name contains a parameter value (optional)
 owner = 'owner_example' # str | Find all tasks where owner name contains a parameter value (optional)
 mode = 'mode_example' # str | Find all tasks with a specific mode (optional)
@@ -686,7 +649,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**object**
+[**InlineResponse2001**](InlineResponse2001.md)
 
 ### Authorization
 
@@ -694,17 +657,15 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **tasks_partial_update**
-> Task tasks_partial_update(id, data)
+> Task tasks_partial_update(body, id)
 
 Methods does a partial update of chosen fields in a task
-
-
 
 ### Example
 ```python
@@ -713,7 +674,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -721,12 +681,12 @@ configuration.password = 'YOUR_PASSWORD'
 
 # create an instance of the API class
 api_instance = swagger_client.TasksApi(swagger_client.ApiClient(configuration))
+body = swagger_client.Task() # Task |
 id = 56 # int | A unique integer value identifying this task.
-data = swagger_client.Task() # Task |
 
 try:
     # Methods does a partial update of chosen fields in a task
-    api_response = api_instance.tasks_partial_update(id, data)
+    api_response = api_instance.tasks_partial_update(body, id)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling TasksApi->tasks_partial_update: %s\n" % e)
@@ -736,8 +696,8 @@ except ApiException as e:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **body** | [**Task**](Task.md)|  |
  **id** | **int**| A unique integer value identifying this task. |
- **data** | [**Task**](Task.md)|  |
 
 ### Return type
 
@@ -759,8 +719,6 @@ Name | Type | Description  | Notes
 
 Method returns details of a specific task
 
-
-
 ### Example
 ```python
 from __future__ import print_function
@@ -768,7 +726,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -802,7 +759,7 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
@@ -812,8 +769,6 @@ Name | Type | Description  | Notes
 
 When task is being created the method returns information about a status of the creation process
 
-
-
 ### Example
 ```python
 from __future__ import print_function
@@ -821,7 +776,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -855,17 +809,15 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **tasks_update**
-> Task tasks_update(id, data)
+> Task tasks_update(body, id)
 
 Method updates a task by id
-
-
 
 ### Example
 ```python
@@ -874,7 +826,6 @@ import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-
 # Configure HTTP basic authorization: Basic
 configuration = swagger_client.Configuration()
 configuration.username = 'YOUR_USERNAME'
@@ -882,12 +833,12 @@ configuration.password = 'YOUR_PASSWORD'
 
 # create an instance of the API class
 api_instance = swagger_client.TasksApi(swagger_client.ApiClient(configuration))
+body = swagger_client.Task() # Task |
 id = 56 # int | A unique integer value identifying this task.
-data = swagger_client.Task() # Task |
 
 try:
     # Method updates a task by id
-    api_response = api_instance.tasks_update(id, data)
+    api_response = api_instance.tasks_update(body, id)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling TasksApi->tasks_update: %s\n" % e)
@@ -897,8 +848,8 @@ except ApiException as e:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **body** | [**Task**](Task.md)|  |
  **id** | **int**| A unique integer value identifying this task. |
- **data** | [**Task**](Task.md)|  |
 
 ### Return type
 
